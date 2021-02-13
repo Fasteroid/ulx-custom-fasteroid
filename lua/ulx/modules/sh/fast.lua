@@ -1,7 +1,9 @@
 --[[
-	INSTRUCTIONS:
-	put this in \garrysmod\addons\ulx\lua\ulx\modules\sh
-	name it something stupid then restart your server
+
+	INSTALL INSTRUCTIONS:
+	put this in \garrysmod\addons\ulx\lua\ulx\modules\sh and restart the server
+	you also might be able to just put the entire repo in your addons folder, but I haven't checked yet.
+
 ]]--
 
 local CATEGORY_NAME = "Fast's Corner"
