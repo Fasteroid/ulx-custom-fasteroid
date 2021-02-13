@@ -28,7 +28,7 @@ local scare = ulx.command( CATEGORY_NAME, "ulx scare", ulx.scare, "!scare" )
 scare:addParam{ type=ULib.cmds.PlayersArg }
 scare:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="damage", ULib.cmds.optional, ULib.cmds.round }
 scare:defaultAccess( ULib.ACCESS_ADMIN )
-scare:help( "Scares target(s) and inflicts the given damage." )
+scare:help( "Slaps target(s) with the stalker scream sound and inflicts damage." )
 
 ------------------------------ Desync ------------------------------
 function ulx.desync( calling_ply, target_plys, sync )
@@ -54,97 +54,96 @@ local desync = ulx.command( CATEGORY_NAME, "ulx desync", ulx.desync, "!desync" )
 desync:addParam{ type=ULib.cmds.PlayersArg }
 desync:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 desync:defaultAccess( ULib.ACCESS_ADMIN )
-desync:help( "Desynchronizes a player from their body." )
+desync:help( "Desynchronizes target(s) from their body, causing many strange effects." )
 desync:setOpposite("ulx resync", {_, _, true}, "!resync")
 
 ------------------------------ SUI Scoreboard Rate ------------------------------
-if(Scoreboard.SendColor) then // probably SUI scoreboard
-	local ValidRatings = { "naughty", "smile", "love", "artistic", "gold_star", "builder", "gay", "informative", "friendly", "lol", "curvey", "best_landvehicle", "best_airvehicle", "stunter", "god" }
 
-	local function GetRatingID( name )
-		for k, v in pairs( ValidRatings ) do
-			if name == v then 
-				return k 
-			end
+local ValidRatings = { "naughty", "smile", "love", "artistic", "gold_star", "builder", "gay", "informative", "friendly", "lol", "curvey", "best_landvehicle", "best_airvehicle", "stunter", "god" }
+
+local function GetRatingID( name )
+	for k, v in pairs( ValidRatings ) do
+		if name == v then 
+			return k 
 		end
-		
+	end
+	
+	return false
+end
+
+local function UpdatePlayerRatings( ply )
+	if not IsValid( ply ) then
 		return false
 	end
-
-	local function UpdatePlayerRatings( ply )
-		if not IsValid( ply ) then
-			return false
-		end
-		
-		local result = sql.Query( "SELECT rating, count(*) as cnt FROM sui_ratings WHERE target = "..ply:UniqueID().." GROUP BY rating " )
-		
-		if not result then
-			return false
-		end
-		
-		for id, row in pairs( result ) do	
-			ply:SetNetworkedInt( "SuiRating."..ValidRatings[ tonumber( row['rating'] ) ], row['cnt'] )	
-		end
+	
+	local result = sql.Query( "SELECT rating, count(*) as cnt FROM sui_ratings WHERE target = "..ply:UniqueID().." GROUP BY rating " )
+	
+	if not result then
+		return false
 	end
-
-	function ulx.rate( calling_ply, target_ply, rating, amount )
-
-		-- following code is frankensteined directly from the SUI rating code
-
-		local RatingID = GetRatingID( rating )
-		local RaterID = (calling_ply:IsValid() and calling_ply:UniqueID()) or 0
-		local TargetID = target_ply:UniqueID()
-
-		-- Rating isn't valid
-		if not RatingID then
-			ULib.tsayError( calling_ply, "Rating wasn't recognized, try a different one.", true )
-			return false
-		end
-		
-		-- Suicidal Bannana, why must you abuse sql like this?
-		-- Can you not even increment a number?  Like for real?
-		local ratings = sql.Query("SELECT * FROM sui_ratings WHERE (target="..TargetID.." AND rating="..RatingID..")") 
-		local numratings = 0
-		if( ratings ) then
-			numratings = #ratings
-		end
-		if( amount > 0 ) then
-			local times = math.min(9999 - numratings, amount)
-
-			sql.Begin()
-			for xd = 1, times do 
-				-- okay this time is easy
-				sql.Query( "INSERT INTO sui_ratings ( target, rater, rating ) VALUES ( "..TargetID..", "..RaterID..", "..RatingID.." )" )
-			end
-			sql.Commit()
-			local giver = (calling_ply:IsValid() and calling_ply:Nick()) or "Console"
-			target_ply:ChatPrint( giver .. " Gave you "..times.." '" ..rating .. "' ratings.\n" );
-			target_ply:SetNetworkedInt( "SuiRating."..ValidRatings[ RatingID ], numratings + times )
-			ulx.fancyLogAdmin( calling_ply, "#A gave #T #i "..rating.." ratings", target_ply, times )
-		elseif( amount < 0 ) then
-			local times = math.min(numratings,-amount)
-
-			sql.Begin()
-			for xd = 1, times do
-				sql.Query("DELETE FROM sui_ratings WHERE ( id="..ratings[xd].id.." )")
-			end
-			sql.Commit()
-			local taker = (calling_ply:IsValid() and calling_ply:Nick()) or "Console"
-			target_ply:ChatPrint( taker .. " Took "..times.." '" ..rating .. "' ratings from you.\n" );
-			target_ply:SetNetworkedInt( "SuiRating."..ValidRatings[ RatingID ], numratings - times )
-			ulx.fancyLogAdmin( calling_ply, "#A took #i "..rating.." ratings from #T", times, target_ply )
-		end
-
-
+	
+	for id, row in pairs( result ) do	
+		ply:SetNetworkedInt( "SuiRating."..ValidRatings[ tonumber( row['rating'] ) ], row['cnt'] )	
 	end
-
-	local rate = ulx.command( CATEGORY_NAME, "ulx rate", ulx.rate, "!rate" )
-	rate:addParam{ type=ULib.cmds.PlayerArg }
-	rate:addParam{ type=ULib.cmds.StringArg, hint="rating" }
-	rate:addParam{ type=ULib.cmds.NumArg, min = -9999, max = 9999, default = 1, hint="amount", ULib.cmds.optional }
-	rate:defaultAccess( ULib.ACCESS_ADMIN )
-	rate:help( "Give or take SUI Scoreboard ratings from a player." )
 end
+
+function ulx.rate( calling_ply, target_ply, rating, amount )
+
+	-- following code is frankensteined directly from the SUI rating code
+
+	local RatingID = GetRatingID( rating )
+	local RaterID = (calling_ply:IsValid() and calling_ply:UniqueID()) or 0
+	local TargetID = target_ply:UniqueID()
+
+	-- Rating isn't valid
+	if not RatingID then
+		ULib.tsayError( calling_ply, "Rating wasn't recognized, try a different one.", true )
+		return false
+	end
+	
+	-- Suicidal Bannana, why must you abuse sql like this?
+	-- Can you not even increment a number?  Like for real?
+	local ratings = sql.Query("SELECT * FROM sui_ratings WHERE (target="..TargetID.." AND rating="..RatingID..")") 
+	local numratings = 0
+	if( ratings ) then
+		numratings = #ratings
+	end
+	if( amount > 0 ) then
+		local times = math.min(9999 - numratings, amount)
+
+		sql.Begin()
+		for xd = 1, times do 
+			-- okay this time is easy
+			sql.Query( "INSERT INTO sui_ratings ( target, rater, rating ) VALUES ( "..TargetID..", "..RaterID..", "..RatingID.." )" )
+		end
+		sql.Commit()
+		local giver = (calling_ply:IsValid() and calling_ply:Nick()) or "Console"
+		target_ply:ChatPrint( giver .. " Gave you "..times.." '" ..rating .. "' ratings.\n" );
+		target_ply:SetNetworkedInt( "SuiRating."..ValidRatings[ RatingID ], numratings + times )
+		ulx.fancyLogAdmin( calling_ply, "#A gave #T #i "..rating.." ratings", target_ply, times )
+	elseif( amount < 0 ) then
+		local times = math.min(numratings,-amount)
+
+		sql.Begin()
+		for xd = 1, times do
+			sql.Query("DELETE FROM sui_ratings WHERE ( id="..ratings[xd].id.." )")
+		end
+		sql.Commit()
+		local taker = (calling_ply:IsValid() and calling_ply:Nick()) or "Console"
+		target_ply:ChatPrint( taker .. " Took "..times.." '" ..rating .. "' ratings from you.\n" );
+		target_ply:SetNetworkedInt( "SuiRating."..ValidRatings[ RatingID ], numratings - times )
+		ulx.fancyLogAdmin( calling_ply, "#A took #i "..rating.." ratings from #T", times, target_ply )
+	end
+
+end
+
+local rate = ulx.command( CATEGORY_NAME, "ulx rate", ulx.rate, "!rate" )
+rate:addParam{ type=ULib.cmds.PlayerArg }
+rate:addParam{ type=ULib.cmds.StringArg, hint="rating" }
+rate:addParam{ type=ULib.cmds.NumArg, min = -9999, max = 9999, default = 1, hint="amount", ULib.cmds.optional }
+rate:defaultAccess( ULib.ACCESS_ADMIN )
+rate:help( "Modifies a player's SUI Scoreboard ratings.  Negative amounts take away ratings." )
+
 
 ------------------------------ Void ------------------------------
 function ulx.void( calling_ply, target_plys )
@@ -168,7 +167,7 @@ end
 local void = ulx.command( CATEGORY_NAME, "ulx void", ulx.void, "!void" )
 void:addParam{ type=ULib.cmds.PlayersArg }
 void:defaultAccess( ULib.ACCESS_ADMIN )
-void:help( "Send players to the void" )
+void:help( "Sends target(s) to the void.  Returning to the map from the void is very difficult, but technically possible." )
 
 ------------------------------ Lagged Slay ------------------------------
 function ulx.laggyslay( calling_ply, target_plys )
@@ -212,7 +211,6 @@ function ulx.laggyslay( calling_ply, target_plys )
 				local traced = util.TraceLine( trace )
 				v:SetPos( traced.HitPos )
 				v:Kill()
-				ulx.fancyLogAdmin( calling_ply, "#A slayed #T", affected_plys )
 			end)
 			timer.Simple( 3.1, function() 
 				net.Start("FunnyLagDeathLol")
@@ -223,13 +221,14 @@ function ulx.laggyslay( calling_ply, target_plys )
 		end
 	end
 
-	ulx.fancyLogAdmin( calling_ply, "#A did something to #T", affected_plys )
+	ulx.fancyLogAdmin( calling_ply, "#A did something to #T...", affected_plys )
+	timer.Simple(3, function() ulx.fancyLogAdmin( nil, "#T lagged to death", affected_plys) end)
 
 end
-local laggyslay = ulx.command( CATEGORY_NAME, "ulx lagslay", ulx.laggyslay, "!lagslay" )
+local laggyslay = ulx.command( CATEGORY_NAME, "ulx lag", ulx.laggyslay, "!lag" )
 laggyslay:addParam{ type=ULib.cmds.PlayersArg }
 laggyslay:defaultAccess( ULib.ACCESS_ADMIN )
-laggyslay:help( "...                       slay        ...        a player   ?" )
+laggyslay:help( "Causes target(s) to rubberband before dying spectacularly." )
 
 if SERVER then
 	util.AddNetworkString( "FunnyLagDeathLol" )
@@ -258,22 +257,26 @@ net.Receive( "FunnyLagDeathLol", function()
 end)
 
 ------------------------------ Max Physics Speed ------------------------------
+local maxspeed
 function ulx.maxspeed( calling_ply, speed )
 	local haha = physenv.GetPerformanceSettings()
+	if( not maxspeed.args[2].default ) then // update default first time we run this
+		maxspeed.args[2].default = haha.MaxVelocity
+	end
 	haha.MaxVelocity = speed
 	physenv.SetPerformanceSettings(haha)
 	ulx.fancyLogAdmin( calling_ply, "#A redefined lightspeed as #i source units per second", speed )
 end
 
-local rate = ulx.command( CATEGORY_NAME, "ulx maxphyspeed", ulx.maxspeed, "!maxphyspeed" )
-rate:addParam{ type=ULib.cmds.NumArg, min = 0, max = 2147483647, default = 4000, hint="speed" }
-rate:defaultAccess( ULib.ACCESS_SUPERADMIN )
-rate:help( "Sets max engine physics object speed." )
+maxspeed = ulx.command( CATEGORY_NAME, "ulx maxphyspeed", ulx.maxspeed, "!maxphyspeed" )
+maxspeed:addParam{ type=ULib.cmds.NumArg, min = 0, max = 2147483647, hint="speed" }
+maxspeed:defaultAccess( ULib.ACCESS_SUPERADMIN )
+maxspeed:help( "Sets the engine's max speed for physics objects." )
 
 ------------------------------ Spots ------------------------------
 local spots = {}
 local spots_currentmap = {}
-local filein = file.Read("ulx_spots.txt")
+local filein = file.Read("ulx_spots.txt") // sql is cool, but I don't like it
 
 if( filein ) then
 	spots = util.JSONToTable(filein)
@@ -296,26 +299,26 @@ function ulx.setspot( calling_ply, spot )
 	funny.movetype = calling_ply:GetMoveType()
 	spots_currentmap[spot] = funny
 	file.Write("ulx_spots.txt", util.TableToJSON(spots))
-	ulx.fancyLogAdmin( calling_ply, "#A saved a location on the map and named it #s", spot)
+	ulx.fancyLogAdmin( calling_ply, "#A saved a spot on the map and named it #s", spot)
 end
 
 local setspot = ulx.command( CATEGORY_NAME, "ulx setspot", ulx.setspot, "!setspot" )
 setspot:addParam{ type=ULib.cmds.StringArg, hint="name" }
 setspot:defaultAccess( ULib.ACCESS_ADMIN )
-setspot:help( "Sets a spot you can teleport to" )
+setspot:help( "Sets a restart-persistent, map-specific spot players can teleport to." )
 
 function ulx.removespot( calling_ply, spot )
 	spot = spot:lower()
 	if( spot == "random" ) then ULib.tsayError( calling_ply, "Pick something else please, random is reserved!", true ) end
 	spots_currentmap[spot] = nil
 	file.Write("ulx_spots.txt", util.TableToJSON(spots))
-	ulx.fancyLogAdmin( calling_ply, "#A removed the location #s if it existed", spot)
+	ulx.fancyLogAdmin( calling_ply, "#A removed the spot #s if it existed", spot)
 end
 
 local removespot = ulx.command( CATEGORY_NAME, "ulx removespot", ulx.removespot, "!removespot" )
 removespot:addParam{ type=ULib.cmds.StringArg, hint="name" }
 removespot:defaultAccess( ULib.ACCESS_ADMIN )
-removespot:help( "Removes a spot" )
+removespot:help( "Removes a previously set spot." )
 
 function ulx.spots( calling_ply, search )
 	local n = 0
@@ -329,9 +332,9 @@ function ulx.spots( calling_ply, search )
 end
 
 local spots = ulx.command( CATEGORY_NAME, "ulx spots", ulx.spots, "!spots" )
-spots:addParam{ type=ULib.cmds.StringArg, hint="search", default="", ULib.cmds.optional }
+spots:addParam{ type=ULib.cmds.StringArg, hint="search term", default="", ULib.cmds.optional }
 spots:defaultAccess( ULib.ACCESS_ADMIN )
-spots:help( "Lists all spots" )
+spots:help( "Lists the names of all spots that include the give search term.  Provide nothing to list them all." )
 
 function ulx.spot( calling_ply, spot, target_ply )
 	spot = spot:lower()
@@ -369,10 +372,10 @@ function ulx.spot( calling_ply, spot, target_ply )
 end
 
 local spot = ulx.command( CATEGORY_NAME, "ulx spot", ulx.spot, "!spot" )
-spot:addParam{ type=ULib.cmds.StringArg, hint="name", default="random" }
+spot:addParam{ type=ULib.cmds.StringArg, ULib.cmds.optional, hint="name", default="random" }
 spot:addParam{ type=ULib.cmds.PlayerArg, ULib.cmds.optional }
 spot:defaultAccess( ULib.ACCESS_ALL )
-spot:help( "Teleport a player somewhere, either specified or unspecified" )
+spot:help( "Teleports the target to the previously set spot. Use the 'random' spot to choose randomly from all spots." )
 
 ------------------------------ Playsound Web ------------------------------
 if SERVER then
@@ -385,10 +388,10 @@ function ulx.playsoundweb( calling_ply, snd )
 	net.Broadcast()
 	ulx.fancyLogAdmin( calling_ply, "#A played sound #s", snd )
 end
-local playsoundweb = ulx.command( CATEGORY_NAME, "ulx playsoundweb", ulx.playsoundweb, "!websound" )
+local playsoundweb = ulx.command( CATEGORY_NAME, "ulx websound", ulx.playsoundweb, "!websound" )
 playsoundweb:addParam{ type=ULib.cmds.StringArg, hint="url" }
 playsoundweb:defaultAccess( ULib.ACCESS_ADMIN )
-playsoundweb:help( "Plays a sound located at a URL" )
+playsoundweb:help( "Plays the sound at the provided URL to all players." )
 
 if CLIENT then
 	local websounds = { }
