@@ -6,16 +6,6 @@ This is a command expansion pack for ULX.
 [ULX](https://github.com/TeamUlysses/ulx) is obviously needed to run these commands, along with its main dependency [ULib](https://github.com/TeamUlysses/ulib).<br>
 Also, the command for rating players requires [SUI Scoreboard](https://github.com/ZionDevelopers/sui-scoreboard) to have visible effects.
 
-## Installation
-
-### Just put this repository in your server's addons folder—simple and easy. &nbsp;After you have all the dependencies, restart the server and it should be good to go!
-
-### Workshop Links
- - [ULX](http://steamcommunity.com/sharedfiles/filedetails/?id=557962280) | `557962280`
- - [ULib](http://steamcommunity.com/sharedfiles/filedetails/?id=557962238) | `557962238`
- - [SUI Scoreboard v2 w/UTime](https://steamcommunity.com/sharedfiles/filedetails/?id=160121673) | `160121673` (other versions can be used if desired)
-
-
 ## Commands & Usage
 - <b>ulx scare</b> ("!scare") `<players>` `<damage: default 0>`<br>
 &ensp;Slaps target(s) with the stalker scream sound and inflicts damage.
@@ -53,6 +43,15 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;URL must link directly to a file! &nbsp;YouTube, Spotify, and SoundCloud links will not work!<br>
 &ensp;Due to technical reasons, this is also rather difficult to use from console.
 
+## Installation
+
+### Just put this repository in your server's addons folder—simple and easy. &nbsp;After you have all the dependencies, restart the server and it should be good to go!
+
+### Workshop Links to Dependencies
+ - [ULX](http://steamcommunity.com/sharedfiles/filedetails/?id=557962280) | `557962280`
+ - [ULib](http://steamcommunity.com/sharedfiles/filedetails/?id=557962238) | `557962238`
+ - [SUI Scoreboard v2 w/UTime](https://steamcommunity.com/sharedfiles/filedetails/?id=160121673) | `160121673` (other versions of SUI scoreboard can also be used)
+ 
 ## Credits
 ULX is brought to you by...
 
