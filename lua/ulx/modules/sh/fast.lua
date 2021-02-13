@@ -1,7 +1,7 @@
 --[[
 	INSTRUCTIONS:
 	put this in \garrysmod\addons\ulx\lua\ulx\modules\sh
-	name it something stupid then restart your server lol
+	name it something stupid then restart your server
 ]]--
 
 local CATEGORY_NAME = "Fast's Corner"
