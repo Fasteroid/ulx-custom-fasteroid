@@ -156,8 +156,13 @@ function ulx.void( calling_ply, target_plys )
 		else
 			v.ulx_prevpos = v:GetPos()
 			v.ulx_prevang = v:EyeAngles()
-	
-			v:SetPos( Vector(-131071,-131071,-131071) )
+			
+			timer.Create("void_"..v:Nick(),0.01,0,function()
+				v:SetPos( Vector(-131071,-131071,-131071) )
+				if( v:GetPos():IsEqualTol(Vector(-131071,-131071,-131071),32) ) then
+					timer.Remove("void_"..v:Nick())
+				end
+			end)
 
 			table.insert( affected_plys, v )
 		end
