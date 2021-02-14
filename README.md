@@ -1,54 +1,61 @@
-# ULX
-ULX is an admin mod for [Garry's Mod](http://garrysmod.com/).
-
-ULX offers server admins an AMXX-style support. It allows multiple admins with different access levels on the same server.
-It features commands from basic kick, ban, and slay to fancier commands such as blind, freeze, voting, and more.
-
-Visit our homepage at http://ulyssesmod.net.
-
-You can talk to us on our forums at http://forums.ulyssesmod.net.
+# Fast's Custom Commands
+[ULX](https://github.com/TeamUlysses/ulx) is an admin mod for [Garry's Mod](http://garrysmod.com/).
+This is a command expansion pack for ULX.
 
 ## Requirements
-ULX requires the latest version of [ULib](https://github.com/TeamUlysses/ulib) to be installed on the server.
+[ULX](https://github.com/TeamUlysses/ulx) is obviously needed to run these commands, along with its main dependency [ULib](https://github.com/TeamUlysses/ulib).<br>
+Also, the command for rating players requires [SUI Scoreboard](https://github.com/ZionDevelopers/sui-scoreboard) to have visible effects.
 
 ## Installation
 
-### Workshop
-ULX's workshop ID is `557962280`. You can subscribe to ULX via Workshop [here](http://steamcommunity.com/sharedfiles/filedetails/?id=557962280).
-Don't forget you'll also need ULib, whose workshop ID is `557962238` and can be found [here](http://steamcommunity.com/sharedfiles/filedetails/?id=557962238).
+### Just put this repository in your server's addons folder—simple and easy. &nbsp;After you have all the dependencies, restart the server and it should be good to go!
 
-### Classic
-To install ULX, simply extract the files from the downloaded archive to your garrysmod/addons/ folder.
-When you've done this, you should have a file structure like this:
+## Commands & Usage
+- <b>ulx scare</b> ("!scare") `<players>` `<damage: default 0>`<br>
+&ensp;Slaps target(s) with the stalker scream sound and inflicts damage.
 
-`(garrysmod)/addons/ulx/lua/ulib/modules/ulx_init.lua`
+- <b>ulx desync, ulx resync</b> ("!desync","!resync") `<players>`<br>
+&ensp;Desynchronizes target(s) from their body, causing many strange effects.
 
-`(garrysmod)/addons/ulx/lua/ulx/modules/fun.lua`
+- <b>ulx void</b> ("!void") `<player>`<br>
+&ensp;Sends target(s) to the void. &nbsp;Returning to the map from the void is very difficult, but still technically possible.
 
-You absolutely, positively have to do a full server restart after installing the files. A simple map change will not cut it!
+- <b>ulx rate</b> ("!rate") `<player>` `<rating>` `<amount: default 1>`<br>
+&ensp;Modifies a player's SUI Scoreboard ratings. &nbsp;Negative amounts take away ratings.
 
-## Usage
-**To give yourself a jump start into ULX, simply remember the commands `ulx help` and `ulx menu`.**
+- <b>ulx lag</b> ("!lag") `<players>`<br>
+&ensp;Causes target(s) to rubberband before dying spectacularly.
 
-To access the commands and settings in ULX, you can open the GUI with `ulx menu` in console. It is recommended to bind this command to a keyboard key. Additionally, you can use console commands in the form of `ulx (command) (arguments)` or chat commands in the form of `!(command) (arguments)`.
+- <b>ulx maxphyspeed</b> ("!maxphyspeed") `<speed: default = dynamic*>`<br>
+&ensp;Sets the engine's max speed for physics objects.<br>
+&ensp;*The default value of `speed` will be set to the last value the max speed was before the use of this command.
 
-To add users to usergroups, navigate to the "Groups" tab of the GUI and select a group. Then use the "Add" button to add connected players. You can also use the `ulx adduser (user) (group)` command. If you absolutely need to, you can also edit the `data/lib/users.txt` file.
+- <b>ulx setspot</b> ("!setspot") `<name>`<br>
+&ensp;Sets a restart-persistent, map-specific spot players can teleport to.<br>
 
-A word about superadmins: Superadmins are considered the highest usergroup. They have access to all the commands in ULX, the ability to override other user's immunity, and are shown log messages which are hidden from other players (EG, they are shown rcon commands admins are running). Superadmins also have the power to give and revoke access to commands using userallow and userdeny.
+- <b>ulx removespot</b> ("!removespot") `<name>`<br>
+&ensp;Removes a previously set spot.<br>
 
-All commands are preceded by `ulx `. Type `ulx help` in a console without the quotes for help.
+- <b>ulx spots</b> ("!spots") `<search term: default = "">`<br>
+&ensp;Lists the names of all spots that include the give search term. &nbsp;Provide nothing to list them all.<br>
 
-Check out the config folder in ulx for some more goodies.
+- <b>ulx spot</b> ("!spot") `<name: default = random>` `<player, defaults to self>`<br>
+&ensp;Teleports the target to the previously set spot. &nbsp;Use the 'random' spot to choose randomly from all spots.<br>
 
+- <b>ulx websound</b> ("!websound") `<url>`<br>
+&ensp;Plays the sound at the provided URL to all players.<br>
+&ensp;URL must link directly to a file! &nbsp;YouTube, Spotify, and SoundCloud links will not work!<br>
+&ensp;Due to technical reasons, this is also rather difficult to use from console.
+
+## Workshop Links to Dependencies
+ - [ULX](http://steamcommunity.com/sharedfiles/filedetails/?id=557962280) | `557962280`
+ - [ULib](http://steamcommunity.com/sharedfiles/filedetails/?id=557962238) | `557962238`
+ - [SUI Scoreboard v2 w/UTime](https://steamcommunity.com/sharedfiles/filedetails/?id=160121673) | `160121673` (other versions of SUI scoreboard can also be used)
+ 
 ## Credits
-ULX is brought to you by..
+ULX is brought to you by...
 
 * Brett "Megiddo" Smith - Contact: <mailto:megiddo@ulyssesmod.net>
 * JamminR - Contact: <mailto:jamminr@ulyssesmod.net>
 * Stickly Man! - Contact: <mailto:sticklyman@ulyssesmod.net>
 * MrPresident - Contact: <mailto:mrpresident@ulyssesmod.net>
-
-A big thanks to JamminR for listening to the rest of the team (especially Megiddo) ramble on, never giving up on us, and for giving the project fresh insights.
-
-## Changelog
-See the [CHANGELOG](CHANGELOG.md) file for information regarding changes between releases.
