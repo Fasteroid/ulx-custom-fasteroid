@@ -435,24 +435,14 @@ end
 
 local function infloop(ent, bullet)
 	if( IsValid(ent) and ent:IsPlayer() and ent:getShitAim() ) then
-		//bullet.Spread = Vector(math.sin(CurTime()),math.cos(CurTime()),0)*10
-		local trace = string.Explode("\n",debug.traceback())
-		local modify = 0
-		for i=#trace-1, 1, -1 do // this is so hacky omg send help
-			v=trace[i]
-			if(string.find(v,"FireBullets")) then modify = modify + 1 end
-			if( modify == 2 ) then return true end
-		end
-		if modify < 2 then
-			local theta = CurTime() * 42069
-			local spread = bullet.Dir:Angle() + Angle(15,0,0)
-			spread:RotateAroundAxis( bullet.Dir, theta )
-			bullet.Dir = spread:Forward()
-			bullet.Spread = Vector(1,1,0)*0.1
-			ent:FireBullets( bullet )
-			return false
-		end
-		return true
+
+		local theta = CurTime() * 42069
+		local spread = bullet.Dir:Angle() + Angle(15,0,0)
+		spread:RotateAroundAxis( bullet.Dir, theta )
+		bullet.Dir = spread:Forward()
+		bullet.Spread = Vector(1,1,0)*0.1
+		return true 
+
 	end
 end
 
