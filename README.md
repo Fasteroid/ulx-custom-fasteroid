@@ -47,7 +47,7 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;URL must link directly to a file! &nbsp;YouTube, Spotify, and SoundCloud links will not work!<br>
 &ensp;Due to technical reasons, this is also rather difficult to use from console.
 
-- <b>ulx shitaim</b> ("!shitaim","!unshitaim") `<player>`<br>
+- <b>ulx shitaim</b> ("!shitaim","!unshitaim") `<players>`<br>
 &ensp;Causes all bullets fired by target(s) to stray about 15 degrees away from their crosshair in random directions.<br>
 &ensp;Good for shutting down aimbots.<br>
 
