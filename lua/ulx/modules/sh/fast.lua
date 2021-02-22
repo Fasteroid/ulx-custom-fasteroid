@@ -1,10 +1,3 @@
---[[
-
-	INSTALL INSTRUCTIONS:
-	put this in \garrysmod\addons\ulx\lua\ulx\modules\sh and restart the server
-	you also might be able to just put the entire repo in your addons folder, but I haven't checked yet.
-
-]]--
 
 local CATEGORY_NAME = "Fast's Corner"
 
@@ -427,3 +420,63 @@ if CLIENT then
 		playWebSound( net.ReadString() )	// no garbage collection for you
 	end)
 end
+
+------------------------------ Bad Aim ------------------------------
+local PlayerMeta = FindMetaTable("Player")
+function PlayerMeta:getShitAim( )
+	return self:GetNW2Bool( "shitaim", false )
+end
+
+if SERVER then
+	function PlayerMeta:setShitAim( enabled )
+		self:SetNW2Bool( "shitaim", enabled )
+	end
+end
+
+local function infloop(ent, bullet)
+	if( IsValid(ent) and ent:IsPlayer() and ent:getShitAim() ) then
+		//bullet.Spread = Vector(math.sin(CurTime()),math.cos(CurTime()),0)*10
+		local trace = string.Explode("\n",debug.traceback())
+		local modify = 0
+		for i=#trace-1, 1, -1 do // this is so hacky omg send help
+			v=trace[i]
+			if(string.find(v,"FireBullets")) then modify = modify + 1 end
+			if( modify == 2 ) then return true end
+		end
+		if modify < 2 then
+			local theta = CurTime() * 42069
+			local spread = bullet.Dir:Angle() + Angle(15,0,0)
+			spread:RotateAroundAxis( bullet.Dir, theta )
+			bullet.Dir = spread:Forward()
+			bullet.Spread = Vector(1,1,0)*0.1
+			ent:FireBullets( bullet )
+			return false
+		end
+		return true
+	end
+end
+
+hook.Add( "EntityFireBullets", "ulx_shitaim", infloop )
+
+function ulx.badaim( calling_ply, target_plys, mode )
+
+	for i = 1, #target_plys do
+		v = target_plys[i]
+		v:setShitAim( not mode )
+	end
+
+
+	if( not mode ) then
+		ulx.fancyLogAdmin( calling_ply, "#A disabled #T's aiming skills", target_plys  )
+	else
+		ulx.fancyLogAdmin( calling_ply, "#A re-enabled #T's aiming skills", target_plys  )
+	end
+
+end
+local badaim = ulx.command( CATEGORY_NAME, "ulx shitaim", ulx.badaim, "!shitaim" )
+badaim:addParam{ type=ULib.cmds.PlayersArg }
+badaim:addParam{ type=ULib.cmds.BoolArg, invisible=true }
+badaim:defaultAccess( ULib.ACCESS_ADMIN )
+badaim:help( "Causes all bullets fired by target(s) to stray about 15 degrees away from their crosshair in random directions." )
+badaim:setOpposite("ulx unshitaim", {_, _, true}, "!unshitaim")
+
