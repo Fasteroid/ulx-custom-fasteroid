@@ -51,6 +51,14 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;Causes all bullets fired by target(s) to stray about 15 degrees away from their crosshair in random directions.<br>
 &ensp;Good for shutting down aimbots.<br>
 
+- <b>ulx ripears</b> ("!ripears","!asmr") `<players>`<br>
+&ensp;Exposes target(s) to very loud sound until stopped with !asmr.<br>
+&ensp;Prolonged exposure should really be avoided, this WILL give you tinnitus.<br>
+
+- <b>ulx fakeban</b> ("!fakeban") `<player>` `[<minutes, 0 for perma: 0<=x, default 0>]` `[{reason}]`<br>
+&ensp;Announces the target was ulx banned, but doesn't actually ban them.<br>
+&ensp;Best used with '0' minutes and a petty ban reason.<br>
+
 ## Workshop Links to Dependencies
  - [ULX](http://steamcommunity.com/sharedfiles/filedetails/?id=557962280) | `557962280`
  - [ULib](http://steamcommunity.com/sharedfiles/filedetails/?id=557962238) | `557962238`

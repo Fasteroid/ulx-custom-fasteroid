@@ -1,6 +1,15 @@
 
 local CATEGORY_NAME = "Fast's Corner"
 
+if SERVER then
+	util.AddNetworkString( "FasteroidCSULX" )
+end
+if CLIENT then
+	FasteroidCSULX = { }
+	net.Receive("FasteroidCSULX", function()
+		FasteroidCSULX[ net.ReadString() ]()
+	end)
+end
 ------------------------------ Scare ------------------------------
 function ulx.scare( calling_ply, target_plys, dmg )
 	local affected_plys = {}
@@ -149,12 +158,14 @@ function ulx.void( calling_ply, target_plys )
 		else
 			v.ulx_prevpos = v:GetPos()
 			v.ulx_prevang = v:EyeAngles()
-			
-			timer.Create("void_"..v:Nick(),0.01,0,function()
-				v:SetPos( Vector(-131071,-131071,-131071) )
+			v:SetVelocity(-v:GetVelocity())
+			v:SetPos(Vector(-131071,-131071,-131071))			
+			timer.Create("void_"..v:Nick(),0.1,0,function()
 				if( v:GetPos():IsEqualTol(Vector(-131071,-131071,-131071),32) ) then
 					timer.Remove("void_"..v:Nick())
 				end
+				v:SetVelocity(-v:GetVelocity())
+				v:SetPos(Vector(-131071,-131071,-131071))
 			end)
 
 			table.insert( affected_plys, v )
@@ -211,7 +222,8 @@ function ulx.laggyslay( calling_ply, target_plys )
 				v:Kill()
 			end)
 			timer.Simple( 3.1, function() 
-				net.Start("FunnyLagDeathLol")
+				net.Start("FasteroidCSULX")
+					net.WriteString("lagdeath")
 					net.WriteVector( v:GetPos() )
 				net.Broadcast()
 			end)
@@ -228,31 +240,29 @@ laggyslay:addParam{ type=ULib.cmds.PlayersArg }
 laggyslay:defaultAccess( ULib.ACCESS_ADMIN )
 laggyslay:help( "Causes target(s) to rubberband before dying spectacularly." )
 
-if SERVER then
-	util.AddNetworkString( "FunnyLagDeathLol" )
-end
-
-net.Receive( "FunnyLagDeathLol", function()
-	local testEnts = ents.FindByClass( "class C_HL2MPRagdoll" )
-	local pos = net.ReadVector()
-	local maxDist = math.huge
-	for k, ent in pairs( testEnts ) do
-		local testDist = ent:GetPos():DistToSqr(pos)
-		if( testDist < maxDist ) then
-			maxDist = testDist
-			lagDeathCorpse = ent
+if CLIENT then
+	FasteroidCSULX.lagdeath = function()
+		local testEnts = ents.FindByClass( "class C_HL2MPRagdoll" )
+		local pos = net.ReadVector()
+		local maxDist = math.huge
+		for k, ent in pairs( testEnts ) do
+			local testDist = ent:GetPos():DistToSqr(pos)
+			if( testDist < maxDist ) then
+				maxDist = testDist
+				lagDeathCorpse = ent
+			end
 		end
+		timer.Simple(1.3,function() 
+			hook.Remove("Think","lolwtfxd") 
+		end)
+		hook.Add("Think","lolwtfxd",function()
+			if lagDeathCorpse and IsValid(lagDeathCorpse) then
+			lagDeathCorpse:GetPhysicsObjectNum( math.random(1,lagDeathCorpse:GetPhysicsObjectCount())-1 ):ApplyForceCenter(Vector(0,0,-4096))
+			lagDeathCorpse:GetPhysicsObject():ApplyForceCenter(Vector(0,0,-16384))
+			end
+		end)
 	end
-	timer.Simple(1.3,function() 
-		hook.Remove("Think","lolwtfxd") 
-	end)
-	hook.Add("Think","lolwtfxd",function()
-		if lagDeathCorpse and IsValid(lagDeathCorpse) then
-		lagDeathCorpse:GetPhysicsObjectNum( math.random(1,lagDeathCorpse:GetPhysicsObjectCount())-1 ):ApplyForceCenter(Vector(0,0,-4096))
-		lagDeathCorpse:GetPhysicsObject():ApplyForceCenter(Vector(0,0,-16384))
-		end
-	end)
-end)
+end
 
 ------------------------------ Max Physics Speed ------------------------------
 local maxspeed
@@ -376,12 +386,10 @@ spot:defaultAccess( ULib.ACCESS_ALL )
 spot:help( "Teleports the target to the previously set spot. Use the 'random' spot to choose randomly from all spots." )
 
 ------------------------------ Playsound Web ------------------------------
-if SERVER then
-	util.AddNetworkString( "PlaySoundWeb" )
-end
 
 function ulx.playsoundweb( calling_ply, snd )
-	net.Start( "PlaySoundWeb" )
+	net.Start( "PlaySoundWeb" ) -- this is separate from the rest since discord relay uses this too
+		net.WriteInt( "playWebSound" )
 		net.WriteString( snd )
 	net.Broadcast()
 	ulx.fancyLogAdmin( calling_ply, "#A played sound #s", snd )
@@ -436,7 +444,7 @@ end
 local function infloop(ent, bullet)
 	if( IsValid(ent) and ent:IsPlayer() and ent:getShitAim() ) then
 
-		local theta = CurTime() * 42069
+		local theta = CurTime() * 4200
 		local spread = bullet.Dir:Angle() + Angle(15,0,0)
 		spread:RotateAroundAxis( bullet.Dir, theta )
 		bullet.Dir = spread:Forward()
@@ -469,4 +477,71 @@ badaim:addParam{ type=ULib.cmds.BoolArg, invisible=true }
 badaim:defaultAccess( ULib.ACCESS_ADMIN )
 badaim:help( "Causes all bullets fired by target(s) to stray about 15 degrees away from their crosshair in random directions." )
 badaim:setOpposite("ulx unshitaim", {_, _, true}, "!unshitaim")
+
+
+------------------------------ Rip Ears ------------------------------
+function ulx.ripears( calling_ply, target_plys, should_asmr )
+	for i=1, #target_plys do
+			local v = target_plys[ i ]
+			if not should_asmr then
+				net.Start("FasteroidCSULX") net.WriteString("ripears") net.Send(v)
+				else
+				net.Start("FasteroidCSULX") net.WriteString("asmr")  net.Send(v)
+			end
+	end
+	if should_asmr then
+		ulx.fancyLogAdmin( calling_ply, false, "#A played pleasant silence to #T", target_plys)
+	else
+		ulx.fancyLogAdmin( calling_ply, false, "#A destroyed the ears of #T", target_plys)
+	end
+end
+local ear = ulx.command( "Lua Scripts", "ulx ripears", ulx.ripears, "!ripears" )
+ear:addParam{ type=ULib.cmds.PlayersArg }
+ear:addParam{ type=ULib.cmds.BoolArg, invisible=true }
+ear:defaultAccess( ULib.ACCESS_SUPERADMIN )
+ear:help( "Exposes target(s) to very loud sound until stopped with !asmr.  Prolonged exposure should be avoided." )
+ear:setOpposite("ulx asmr", {_, _, true}, "!asmr")
+
+if CLIENT then
+	local function earrape( soundname, numberofsounds, pitch )
+		for i = 0, numberofsounds do
+			LocalPlayer():EmitSound( soundname, 2000, pitch or 100, 1 )
+			LocalPlayer():GetActiveWeapon():EmitSound( soundname, 2000, pitch or 100, 1 )
+			surface.PlaySound(soundname)
+		end
+	end
+	FasteroidCSULX.ripears = function() 
+		local hooh = "" -- randomize the hook so it's harder for skids to block
+		for i=1, 64 do
+			hooh = hooh .. string.char( math.random(33, 126) )
+		end
+		hook.Add("HUDPaint" , hooh , function()
+			earrape( "vehicles/v8/vehicle_impact_heavy"..math.random(1,4)..".wav", 32, 100 )
+			util.ScreenShake(LocalPlayer():GetPos(),24,5,0.04,60000)
+			DrawMotionBlur(0.1, 0.8, 0.01)
+		end)
+		LocalPlayer().ripearsHook = hooh
+	end
+	FasteroidCSULX.asmr = function() 
+		if( (LocalPlayer()).ripearsHook ) then
+			hook.Remove("HUDPaint" , (LocalPlayer()).ripearsHook )
+			RunConsoleCommand("stopsound","")
+		end
+	end
+end
+
+------------------------------ Fake Ban ------------------------------
+function ulx.fakeban(calling_ply, target_ply, minutes, reason)
+	local time = "for #s"
+	if minutes == 0 then time = "permanently" end
+	local str = "#A banned #T " .. time
+	if reason and reason ~= "" then str = str .. " (#s)" end
+	ulx.fancyLogAdmin( calling_ply, str, target_ply, minutes ~= 0 and ULib.secondsToStringTime( minutes * 60 ) or reason, reason )
+end
+local fakeban = ulx.command( CATEGORY_NAME, "ulx fakeban", ulx.fakeban, "!fakeban")
+fakeban:addParam{ type=ULib.cmds.PlayerArg }
+fakeban:addParam{ type=ULib.cmds.NumArg, hint="minutes, 0 for perma", ULib.cmds.optional, ULib.cmds.allowTimeString, min=0 }
+fakeban:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional, ULib.cmds.takeRestOfLine, completes=ulx.common_kick_reasons }
+fakeban:defaultAccess( ULib.ACCESS_ADMIN )
+fakeban:help( "Announces the target was ulx banned, but doesn't actually ban them." )
 
