@@ -5,6 +5,7 @@ if SERVER then
 	util.AddNetworkString( "FasteroidCSULX" )
 end
 if CLIENT then
+	WEBSOUNDS = { }
 	FasteroidCSULX = { }
 	net.Receive("FasteroidCSULX", function()
 		FasteroidCSULX[ net.ReadString() ]()
@@ -388,8 +389,8 @@ spot:help( "Teleports the target to the previously set spot. Use the 'random' sp
 ------------------------------ Playsound Web ------------------------------
 
 function ulx.playsoundweb( calling_ply, snd )
-	net.Start( "PlaySoundWeb" ) -- this is separate from the rest since discord relay uses this too
-		net.WriteInt( "playWebSound" )
+	net.Start( "FasteroidCSULX" )
+		net.WriteString( "websound" )
 		net.WriteString( snd )
 	net.Broadcast()
 	ulx.fancyLogAdmin( calling_ply, "#A played sound #s", snd )
@@ -400,26 +401,26 @@ playsoundweb:defaultAccess( ULib.ACCESS_ADMIN )
 playsoundweb:help( "Plays the sound at the provided URL to all players." )
 
 if CLIENT then
-	local websounds = { }
-	function playWebSound( url, time ) 
+	FasteroidCSULX.websound = function() 
+		local url = net.ReadString()
 		sound.PlayURL( url, "", function( station )
 			if ( IsValid( station ) ) then	
 				time = time or math.huge
 				time = time + CurTime()
 				station:Play()
-				websounds[ station ] = time
+				WEBSOUNDS[ station ] = time
 			end
 		end )
 	end
 	hook.Add( "Think", "WebSoundProc", function()
-		for k, v in pairs( websounds ) do
+		for k, v in pairs( WEBSOUNDS ) do
 			if( not IsValid(k) or k:GetState()==GMOD_CHANNEL_STOPPED ) then
-				websounds[k] = nil // remove sound if it finishes
+				WEBSOUNDS[k] = nil // remove sound if it finishes
 				continue
 			end
 			if( CurTime() > v ) then
 				k:Stop()
-				websounds[k] = nil
+				WEBSOUNDS[k] = nil
 				k = nil
 			end
 		end
@@ -429,7 +430,8 @@ if CLIENT then
 	end)
 end
 
------------------------------- Bad Aim ------------------------------
+------------------------------ "Bad Aim" ------------------------------
+
 local PlayerMeta = FindMetaTable("Player")
 function PlayerMeta:getShitAim( )
 	return self:GetNW2Bool( "shitaim", false )
@@ -543,5 +545,16 @@ fakeban:addParam{ type=ULib.cmds.PlayerArg }
 fakeban:addParam{ type=ULib.cmds.NumArg, hint="minutes, 0 for perma", ULib.cmds.optional, ULib.cmds.allowTimeString, min=0 }
 fakeban:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional, ULib.cmds.takeRestOfLine, completes=ulx.common_kick_reasons }
 fakeban:defaultAccess( ULib.ACCESS_ADMIN )
-fakeban:help( "Announces the target was ulx banned, but doesn't actually ban them." )
+fakeban:help( "Doesn't actually ban them." )
+
+------------------------------ Nadmod Cleanup ------------------------------
+if NADMOD then
+	function ulx.nadclean( calling_ply )
+		RunConsoleCommand( "nadmod_cdp" )
+		ulx.fancyLogAdmin( calling_ply, "#A cleaned up disconnected player's props" )
+	end
+	local nadclean = ulx.command( CATEGORY_NAME, "ulx cleanupdiscon", ulx.nadclean, "!cleanupdiscon" )
+	nadclean:defaultAccess( ULib.ACCESS_ADMIN )
+	nadclean:help( "(NADMOD PP) Clears props of disconnected players." )
+end
 
