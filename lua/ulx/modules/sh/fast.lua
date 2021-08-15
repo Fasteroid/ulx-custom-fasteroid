@@ -486,9 +486,13 @@ function ulx.ripears( calling_ply, target_plys, should_asmr )
 	for i=1, #target_plys do
 			local v = target_plys[ i ]
 			if not should_asmr then
-				net.Start("FasteroidCSULX") net.WriteString("ripears") net.Send(v)
-				else
-				net.Start("FasteroidCSULX") net.WriteString("asmr")  net.Send(v)
+				net.Start("FasteroidCSULX")
+					net.WriteString("ripears")
+				net.Send(v)
+			else
+				net.Start("FasteroidCSULX") 
+					net.WriteString("asmr")
+				net.Send(v)
 			end
 	end
 	if should_asmr then
@@ -513,21 +517,26 @@ if CLIENT then
 		end
 	end
 	FasteroidCSULX.ripears = function() 
-		local hooh = "" -- randomize the hook so it's harder for skids to block
-		for i=1, 64 do
-			hooh = hooh .. string.char( math.random(33, 126) )
+		local Player = LocalPlayer()
+		if not Player.ripearsHook then
+			local hooh = "" -- randomize the hook so it's just a bit harder for skids to block
+			for i=1, 64 do
+				hooh = hooh .. string.char( math.random(33, 126) )
+			end
+			hook.Add("HUDPaint" , hooh , function()
+				earrape( "vehicles/v8/vehicle_impact_heavy"..math.random(1,4)..".wav", 32, 100 )
+				util.ScreenShake(Player:GetPos(),24,5,0.04,60000)
+				DrawMotionBlur(0.1, 0.8, 0.01)
+			end)
+			Player.ripearsHook = hooh
 		end
-		hook.Add("HUDPaint" , hooh , function()
-			earrape( "vehicles/v8/vehicle_impact_heavy"..math.random(1,4)..".wav", 32, 100 )
-			util.ScreenShake(LocalPlayer():GetPos(),24,5,0.04,60000)
-			DrawMotionBlur(0.1, 0.8, 0.01)
-		end)
-		LocalPlayer().ripearsHook = hooh
 	end
 	FasteroidCSULX.asmr = function() 
-		if( (LocalPlayer()).ripearsHook ) then
-			hook.Remove("HUDPaint" , (LocalPlayer()).ripearsHook )
-			RunConsoleCommand("stopsound","")
+		local Player = LocalPlayer()
+		RunConsoleCommand("stopsound","")
+		if( Player.ripearsHook ) then
+			hook.Remove("HUDPaint" , Player.ripearsHook )
+			Player.ripearsHook = nil
 		end
 	end
 end
@@ -548,13 +557,30 @@ fakeban:defaultAccess( ULib.ACCESS_ADMIN )
 fakeban:help( "Doesn't actually ban them." )
 
 ------------------------------ Nadmod Cleanup ------------------------------
-if NADMOD then
-	function ulx.nadclean( calling_ply )
-		RunConsoleCommand( "nadmod_cdp" )
-		ulx.fancyLogAdmin( calling_ply, "#A cleaned up disconnected player's props" )
-	end
-	local nadclean = ulx.command( CATEGORY_NAME, "ulx cleanupdiscon", ulx.nadclean, "!cleanupdiscon" )
-	nadclean:defaultAccess( ULib.ACCESS_ADMIN )
-	nadclean:help( "(NADMOD PP) Clears props of disconnected players." )
+function ulx.nadclean( calling_ply )
+	RunConsoleCommand( "nadmod_cdp" )
+	ulx.fancyLogAdmin( calling_ply, "#A cleaned up disconnected player's props" )
 end
+local nadclean = ulx.command( CATEGORY_NAME, "ulx cleanupdiscon", ulx.nadclean, "!cleanupdiscon" )
+nadclean:defaultAccess( ULib.ACCESS_ADMIN )
+nadclean:help( "(NADMOD PP) Clears props of disconnected players." )
 
+------------------------------ Remove Gibs Cleanup ------------------------------
+function ulx.gibclean( calling_ply )
+	local count = 0
+	print("remove")
+	for k, v in ipairs( ents.FindByClass("gib") ) do 
+		v:Remove() 
+		count = count + 1
+	end
+	for k, v in ipairs( ents.FindByClass("item_*") ) do 
+		v:Remove() 
+		count = count + 1
+	end
+	ulx.fancyLogAdmin( calling_ply, "#A cleaned up #i world entities", count )
+end
+local gibclean = ulx.command( CATEGORY_NAME, "ulx cleargibs", ulx.gibclean, "!cleargibs" )
+gibclean:defaultAccess( ULib.ACCESS_ALL )
+gibclean:help( "Removes gibs that might be cluttering the map." )
+
+--
