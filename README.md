@@ -17,8 +17,8 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 - <b>ulx desync, ulx resync</b> ("!desync","!resync") `<players>`<br>
 &ensp;Desynchronizes target(s) from their body, causing many strange effects.
 
-- <b>ulx void</b> ("!void") `<player>`<br>
-&ensp;Sends target(s) to the void. &nbsp;Returning to the map from the void is very difficult, but still technically possible.
+- <b>ulx void</b> ("!void") `<players>`<br>
+&ensp;Sends target(s) to the void. &nbsp;Returning to the map from the void is very difficult, but theoretically possible.
 
 - <b>ulx rate</b> ("!rate") `<player>` `<rating>` `<amount: default 1>`<br>
 &ensp;Modifies a player's SUI Scoreboard ratings. &nbsp;Negative amounts take away ratings.
@@ -53,7 +53,7 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 
 - <b>ulx ripears</b> ("!ripears","!asmr") `<players>`<br>
 &ensp;Exposes target(s) to very loud sound until stopped with !asmr.<br>
-&ensp;Prolonged exposure should really be avoided, this WILL give you tinnitus.<br>
+&ensp;Prolonged exposure should really be avoided; this may actually harm players at full volume.<br>
 
 - <b>ulx fakeban</b> ("!fakeban") `<player>` `[<minutes, 0 for perma: 0<=x, default 0>]` `[{reason}]`<br>
 &ensp;Announces the target was ulx banned, but doesn't actually ban them.<br>
