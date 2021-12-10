@@ -59,6 +59,9 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;Announces the target was ulx banned, but doesn't actually ban them.<br>
 &ensp;Best used with '0' minutes and a petty ban reason.<br>
 
+## Bonus Improvements
+- Deaths now set your "previous location" so you can `ulx return` to it.
+
 ## Workshop Links to Dependencies
  - [ULX](http://steamcommunity.com/sharedfiles/filedetails/?id=557962280) | `557962280`
  - [ULib](http://steamcommunity.com/sharedfiles/filedetails/?id=557962238) | `557962238`
