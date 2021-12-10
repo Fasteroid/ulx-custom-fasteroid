@@ -566,16 +566,14 @@ nadclean:defaultAccess( ULib.ACCESS_ADMIN )
 nadclean:help( "(NADMOD PP) Clears props of disconnected players." )
 
 ------------------------------ Remove Gibs Cleanup ------------------------------
+local GIB_TYPES = {"gib","item_*","debris"}
 function ulx.gibclean( calling_ply )
 	local count = 0
-	print("remove")
-	for k, v in ipairs( ents.FindByClass("gib") ) do 
-		v:Remove() 
-		count = count + 1
-	end
-	for k, v in ipairs( ents.FindByClass("item_*") ) do 
-		v:Remove() 
-		count = count + 1
+	for _, class in ipairs(GIB_TYPES) do
+		for k, v in ipairs( ents.FindByClass(class) ) do 
+			v:Remove() 
+			count = count + 1
+		end
 	end
 	ulx.fancyLogAdmin( calling_ply, "#A cleaned up #i world entities", count )
 end
@@ -583,4 +581,10 @@ local gibclean = ulx.command( CATEGORY_NAME, "ulx cleargibs", ulx.gibclean, "!cl
 gibclean:defaultAccess( ULib.ACCESS_ALL )
 gibclean:help( "Removes gibs that might be cluttering the map." )
 
---
+------------------------------ Remove Gibs Cleanup ------------------------------
+
+-- make ulx return work when you die
+hook.Add("DoPlayerDeath", "ulx_return_death", function(ply) 
+	ply.ulx_prevpos = ply:GetPos()
+	ply.ulx_prevang = ply:EyeAngles()
+end )
