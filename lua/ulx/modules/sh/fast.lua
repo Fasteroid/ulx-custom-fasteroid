@@ -4,6 +4,8 @@ local CATEGORY_NAME = "Fast's Corner"
 if SERVER then
 	util.AddNetworkString( "FasteroidCSULX" )
 end
+
+local FasteroidCSULX
 if CLIENT then
 	WEBSOUNDS = { }
 	FasteroidCSULX = { }
@@ -555,33 +557,6 @@ fakeban:addParam{ type=ULib.cmds.NumArg, hint="minutes, 0 for perma", ULib.cmds.
 fakeban:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional, ULib.cmds.takeRestOfLine, completes=ulx.common_kick_reasons }
 fakeban:defaultAccess( ULib.ACCESS_ADMIN )
 fakeban:help( "Doesn't actually ban them." )
-
------------------------------- Nadmod Cleanup ------------------------------
-function ulx.nadclean( calling_ply )
-	RunConsoleCommand( "nadmod_cdp" )
-	ulx.fancyLogAdmin( calling_ply, "#A cleaned up disconnected player's props" )
-end
-local nadclean = ulx.command( CATEGORY_NAME, "ulx cleanupdiscon", ulx.nadclean, "!cleanupdiscon" )
-nadclean:defaultAccess( ULib.ACCESS_ADMIN )
-nadclean:help( "(NADMOD PP) Clears props of disconnected players." )
-
------------------------------- Remove Gibs Cleanup ------------------------------
-local GIB_TYPES = {"gib","item_*","debris"}
-function ulx.gibclean( calling_ply )
-	local count = 0
-	for _, class in ipairs(GIB_TYPES) do
-		for k, v in ipairs( ents.FindByClass(class) ) do 
-			v:Remove() 
-			count = count + 1
-		end
-	end
-	ulx.fancyLogAdmin( calling_ply, "#A cleaned up #i world entities", count )
-end
-local gibclean = ulx.command( CATEGORY_NAME, "ulx cleargibs", ulx.gibclean, "!cleargibs" )
-gibclean:defaultAccess( ULib.ACCESS_ALL )
-gibclean:help( "Removes gibs that might be cluttering the map." )
-
------------------------------- Remove Gibs Cleanup ------------------------------
 
 -- make ulx return work when you die
 hook.Add("DoPlayerDeath", "ulx_return_death", function(ply) 
