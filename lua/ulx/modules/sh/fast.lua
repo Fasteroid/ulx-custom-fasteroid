@@ -562,5 +562,3 @@ hook.Add("DoPlayerDeath", "ulx_return_death", function(ply)
 	ply.ulx_prevpos = ply:GetPos()
 	ply.ulx_prevang = ply:EyeAngles()
 end )
-
--- test commit for e2bi console
