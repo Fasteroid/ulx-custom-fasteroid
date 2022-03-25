@@ -47,11 +47,10 @@ function ulx.desync( calling_ply, target_plys, sync )
 		end
 	end
 
-
 	if( not sync ) then
-		ulx.fancyLogAdmin( calling_ply, "#A punched #T into the astral plane", target_plys  )
+		ulx.fancyLogAdmin( calling_ply, "#A punched #T into the astral plane", target_plys )
 	else
-		ulx.fancyLogAdmin( calling_ply, "#A recalled #T from the astral plane", target_plys  )
+		ulx.fancyLogAdmin( calling_ply, "#A recalled #T from the astral plane", target_plys )
 	end
 
 end
