@@ -644,7 +644,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 		return
 	end
 
-	if( ply:InVehicle() ) then
+	if( target_ply:InVehicle() ) then
 		ULib.tsayError( calling_ply, "Target is in a vehicle.", true )
 		return		
 	end
