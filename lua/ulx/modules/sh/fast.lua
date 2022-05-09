@@ -640,8 +640,13 @@ end
 function ulx.botbomb( calling_ply, target_ply, dmg )
 	
 	if( player.GetCount() == game.MaxPlayers() ) then 
-		ULib.tsayError( calling_ply, "Can't spawn a bot, the server is full!", true )
+		ULib.tsayError( calling_ply, "Can't spawn the bot, the server is full!", true )
 		return
+	end
+
+	if( ply:InVehicle() ) then
+		ULib.tsayError( calling_ply, "Target is in a vehicle.", true )
+		return		
 	end
 
 	local trace = util.TraceHull( {
@@ -653,7 +658,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 	} )
 
 	if trace.Fraction < 0.2 then
-		ULib.tsayError( calling_ply, "Ceiling is too low, can't airstrike the target!", true )		
+		ULib.tsayError( calling_ply, "Target is under something.", true )		
 		return
 	end
 
@@ -688,7 +693,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 		local collisionCheck = util.TraceHull( {
 			start = bot:GetPos(),
 			endpos = bot:GetPos(),
-			filter = function(e) if e == target_ply or e == target_ply:GetVehicle() then return true else return false end end,
+			filter = function(e) if e == target_ply then return true else return false end end,
 			mins = Vector(-17,-17,-1),
 			maxs = Vector(17,17,73),
 			ignoreworld = true,
