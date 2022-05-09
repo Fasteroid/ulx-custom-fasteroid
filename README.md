@@ -1,4 +1,4 @@
-# Fast's Custom Commands
+# Fast's ULX Custom Commands
 [ULX](https://github.com/TeamUlysses/ulx) is an admin mod for [Garry's Mod](http://garrysmod.com/).
 This is a command expansion pack for ULX.
 
@@ -58,6 +58,10 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 - <b>ulx fakeban</b> ("!fakeban") `<player>` `[<minutes, 0 for perma: 0<=x, default 0>]` `[{reason}]`<br>
 &ensp;Announces the target was ulx banned, but doesn't actually ban them.<br>
 &ensp;Best used with '0' minutes and a petty ban reason.<br>
+
+- <b>ulx botbomb</b> ("!botbomb") `<player>`<br>
+&ensp;Airstrikes the target with a bot. &nbsp;The bot explodes when it lands and will kill the target if it lands on them.<br>
+&ensp;The bot has <i>some</i> airstrafing capabilities but will probably miss if dropped on a moving target.
 
 ## Bonus Improvements
 - Deaths now set your "previous location" so you can `ulx return` to it.
