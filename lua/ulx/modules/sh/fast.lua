@@ -662,6 +662,8 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 		return
 	end
 
+	ulx.fancyLogAdmin( calling_ply, "#A called in an airstrike on #T", target_ply )
+
 	local bot = player.CreateNextBot( botNames[math.random(#botNames)] )
 	bot:GodEnable()
 	bot:SetPos(trace.HitPos)
