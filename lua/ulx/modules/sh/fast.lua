@@ -601,6 +601,7 @@ local function botbombExplode(ply, bot)
 	end )		
 	
 	bot:GodDisable()
+	ply:GodDisable()
 	ply:TakeDamage( 2147483647, bot, ply ) -- I know kill exists but this makes it show up in the killfeed, which is funnier
 	
 	util.ScreenShake( playerpos, 100, 15, 1.5, 800 )
