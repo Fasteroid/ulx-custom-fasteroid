@@ -688,7 +688,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 		local collisionCheck = util.TraceHull( {
 			start = bot:GetPos(),
 			endpos = bot:GetPos(),
-			filter = function(e) if e == target_ply then return true else return false end end,
+			filter = function(e) if e == target_ply or e == target_ply:GetVehicle() then return true else return false end end,
 			mins = Vector(-17,-17,-1),
 			maxs = Vector(17,17,73),
 			ignoreworld = true,
