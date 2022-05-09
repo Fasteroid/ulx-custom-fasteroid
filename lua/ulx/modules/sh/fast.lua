@@ -449,7 +449,7 @@ local function infloop(ent, bullet)
 
 		local theta = CurTime() * 4200
 		local spread = bullet.Dir:Angle() + Angle(15,0,0)
-		spread:RotateAroundAxis( bullet.Dir, theta )
+		spread:RotateAroundAxis( bullet.Dir, util.SharedRandom( "shitaim", 0, 360 ) )
 		bullet.Dir = spread:Forward()
 		bullet.Spread = Vector(1,1,0)*0.1
 		return true 
@@ -557,8 +557,158 @@ fakeban:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional, U
 fakeban:defaultAccess( ULib.ACCESS_ADMIN )
 fakeban:help( "Doesn't actually ban them." )
 
+------------------------------ Return ------------------------------
 -- make ulx return work when you die
 hook.Add("DoPlayerDeath", "ulx_return_death", function(ply) 
 	ply.ulx_prevpos = ply:GetPos()
 	ply.ulx_prevang = ply:EyeAngles()
 end )
+
+------------------------------ Bot Bomb ------------------------------
+local botNames = {
+	"death",
+	"bomb",
+	"slave"
+}
+local botFailMessages = {
+	"FUCK",
+	"aGH",
+	"NO",
+	"rip",
+}
+local botSuccessMessages = {
+	"HA",
+	"GOTCHA",
+	"YEET",
+	"FUCKED",
+	"GONE"
+}
+
+-- stolen from ulx custom, forgive me
+-- I was lazy today
+local function botbombExplode(ply, bot)
+	local playerpos = ply:GetPos()	
+	local waterlevel = ply:WaterLevel()	
+	
+	timer.Simple( 0.1, function()				
+		local traceworld = {}				
+			traceworld.start = playerpos					
+			traceworld.endpos = traceworld.start + ( Vector( 0,0,-1 ) * 250 )					
+			local trw = util.TraceLine( traceworld )					
+			local worldpos1 = trw.HitPos + trw.HitNormal					
+			local worldpos2 = trw.HitPos - trw.HitNormal				
+		util.Decal( "Scorch",worldpos1,worldpos2 )				
+	end )		
+	
+	bot:GodDisable()
+	ply:TakeDamage( 2147483647, bot, ply ) -- I know kill exists but this makes it show up in the killfeed, which is funnier
+	
+	util.ScreenShake( playerpos, 100, 15, 1.5, 800 )
+	
+	if ( waterlevel > 1 ) then		
+		local vPoint = playerpos + Vector(0,0,10)				
+			local effectdata = EffectData()					
+			effectdata:SetStart( vPoint )					
+			effectdata:SetOrigin( vPoint )					
+			effectdata:SetScale( 3 )					
+		util.Effect( "WaterSurfaceExplosion", effectdata )				
+		local vPoint = playerpos + Vector(0,0,10)				
+			local effectdata = EffectData()					
+			effectdata:SetStart( vPoint )					
+			effectdata:SetOrigin( vPoint )					
+			effectdata:SetScale( 3 )					
+		util.Effect( "HelicopterMegaBomb", effectdata ) 				
+	else			
+		local vPoint = playerpos + Vector( 0,0,10 )				
+			local effectdata = EffectData()					
+			effectdata:SetStart( vPoint )					
+			effectdata:SetOrigin( vPoint )					
+			effectdata:SetScale( 3 )					
+		util.Effect( "HelicopterMegaBomb", effectdata )				
+		ply:EmitSound( Sound ("ambient/explosions/explode_4.wav") )				
+	end		
+end
+
+local function failBotbomb(bot, hookName)
+	bot:Say(botFailMessages[math.random(#botFailMessages)])
+	botbombExplode(bot,bot)
+	bot:Kick()
+	hook.Remove("Think",hookName)
+end
+
+function ulx.botbomb( calling_ply, target_ply, dmg )
+	
+	if( player.GetCount() == game.MaxPlayers() ) then 
+		ULib.tsayError( calling_ply, "Can't spawn a bot, the server is full!", true )
+		return
+	end
+
+	local trace = util.TraceHull( {
+		start = target_ply:WorldSpaceCenter(),
+		endpos = target_ply:WorldSpaceCenter() + Vector(0,0,8192),
+		filter = target_ply,
+		mins = Vector(-16,-16,0), -- size of the bot
+		maxs = Vector(16,16,72)
+	} )
+
+	if trace.Fraction < 0.2 then
+		ULib.tsayError( calling_ply, "Ceiling is too low, can't airstrike the target!", true )		
+		return
+	end
+
+	local bot = player.CreateNextBot( botNames[math.random(#botNames)] )
+	bot:GodEnable()
+	bot:SetPos(trace.HitPos)
+
+	local hookName = "botbomb_"..target_ply:Nick()
+
+	timer.Create(hookName,10,1,function() -- remove after 10 seconds if it doesn't find them
+		if( bot == NULL ) then return end
+		failBotbomb(bot,hookName)
+	end)
+
+	hook.Add("Think",hookName,function()
+		
+		if( target_ply == NULL ) then
+			if bot ~= NULL then
+				failBotbomb(bot,hookName)
+			end
+		elseif( bot == NULL ) then
+			hook.Remove("Think",hookName)
+		end
+
+		local aimVec = (target_ply:GetShootPos() - bot:GetShootPos())
+		bot:SetEyeAngles( aimVec:Angle() )
+		aimVec[3] = 0
+		local damping = bot:GetVelocity()
+		damping[3] = 0
+		bot:SetVelocity( aimVec:GetNormalized()*20 - damping * 0.1  )
+
+		local collisionCheck = util.TraceHull( {
+			start = bot:GetPos(),
+			endpos = bot:GetPos(),
+			filter = function(e) if e == target_ply then return true else return false end end,
+			mins = Vector(-17,-17,-1),
+			maxs = Vector(17,17,73),
+			ignoreworld = true,
+		} )
+
+		if( collisionCheck.Hit ) then
+			bot:SetPos(target_ply:GetPos() + Vector(0,0,100))
+			bot:Say(botSuccessMessages[math.random(#botSuccessMessages)])
+			botbombExplode(target_ply,bot)
+			bot:Kill()
+			timer.Simple(0.5, function() if bot~=NULL then bot:Kick() end end)
+			hook.Remove("Think",hookName)
+		elseif bot:OnGround() then
+			failBotbomb(bot,hookName)
+		end
+		
+	end)
+
+end
+
+local botbomb = ulx.command( CATEGORY_NAME, "ulx botbomb", ulx.botbomb, "!botbomb" )
+botbomb:addParam{ type=ULib.cmds.PlayerArg }
+botbomb:defaultAccess( ULib.ACCESS_SUPERADMIN )
+botbomb:help( "Airstrikes the target with a bot." )
