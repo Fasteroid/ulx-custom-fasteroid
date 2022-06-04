@@ -716,7 +716,90 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 
 end
 
+
 local botbomb = ulx.command( CATEGORY_NAME, "ulx botbomb", ulx.botbomb, "!botbomb" )
 botbomb:addParam{ type=ULib.cmds.PlayerArg }
 botbomb:defaultAccess( ULib.ACCESS_SUPERADMIN )
 botbomb:help( "Airstrikes the target with a bot." )
+
+
+
+------------------------------ Serialize (PROBABLY DANGEROUS) ------------------------------
+local sayCmdCheck
+local playerParseAndValidate = ULib.cmds.PlayerArg.parseAndValidate 
+local playersParseAndValidate = ULib.cmds.PlayersArg.parseAndValidate 
+
+local sayCmdCheck = hook.GetTable()["PlayerSay"]["ULib_saycmd"]
+
+local function escape(text)
+	text = string.Replace(text,"\\","\\\\")
+	text = string.Replace(text,'"','\\"')
+	return text
+end
+
+function ulx.serialize( calling_ply, command )
+
+	-- first pick out the command from saycmds
+
+	local match = nil
+
+	for str, data in pairs( ULib.sayCmds ) do
+		local str2 = str
+		if command:len() < str:len() then -- Go ahead and allow commands w/o spaces
+			str2 = string.Trim( str )
+		end
+
+		if command:sub( 1, str2:len() ):lower() == str2 then
+			if not match or match:len() <= str:len() then -- Don't rematch if there's a more specific one already.
+				match = str
+			end
+		end
+	end
+	
+	if match == nil then -- gorp
+		ULib.tsayError( calling_ply, "Couldn't match any existing commands.", true )		
+		return
+	end
+	
+	local access = ULib.sayCmds[ match ].access
+	local cmd = ULib.cmds.translatedCmds[access]
+	
+	local argv = ULib.splitArgs( command )
+	table.remove(argv,1)
+
+	local stack = { argv }
+
+	local j = 1
+	for i, argInfo in ipairs( cmd.args ) do -- Translate each input arg into our output
+		if( argInfo.type.invisible ) then 
+			continue
+		end
+		if( (argInfo.type.parseAndValidate == playerParseAndValidate or argInfo.type.parseAndValidate == playersParseAndValidate) and argv[j] ) then -- SERIALIZE PLAYERARG!
+			local oldstack = table.Copy(stack)
+			stack = { }
+			for a, argv_local in pairs(oldstack) do
+				local oldarg = argv_local[j]
+				local targets = ULib.getUsers(oldarg,true,calling_ply)
+				for k, v in pairs( targets ) do
+					local argvcopy = table.Copy(argv_local)
+					argvcopy[j] = '"' .. escape( v:Nick() ) .. '"'
+					table.insert(stack, argvcopy)
+				end
+			end
+		end
+		-- todo: fix TakeRestOfLines!
+		j = j + 1
+	end
+
+	ulx.fancyLogAdmin( calling_ply, "#A serialized #s", command )
+
+	for k, args in pairs(stack) do
+		sayCmdCheck(calling_ply,match .. table.concat(args," "))
+	end
+
+end
+
+local serialize = ulx.command( CATEGORY_NAME, "ulx serialize", ulx.serialize, "!serialize" )
+serialize:addParam{ type=ULib.cmds.StringArg, ULib.cmds.takeRestOfLine }
+serialize:defaultAccess( ULib.ACCESS_SUPERADMIN )
+serialize:help( "Split one command into many." )
