@@ -67,11 +67,11 @@ local ValidRatings = { "naughty", "smile", "love", "artistic", "gold_star", "bui
 
 local function GetRatingID( name )
 	for k, v in pairs( ValidRatings ) do
-		if name == v then 
-			return k 
+		if name == v then
+			return k
 		end
 	end
-	
+
 	return false
 end
 
@@ -79,15 +79,15 @@ local function UpdatePlayerRatings( ply )
 	if not IsValid( ply ) then
 		return false
 	end
-	
+
 	local result = sql.Query( "SELECT rating, count(*) as cnt FROM sui_ratings WHERE target = "..ply:UniqueID().." GROUP BY rating " )
-	
+
 	if not result then
 		return false
 	end
-	
-	for id, row in pairs( result ) do	
-		ply:SetNetworkedInt( "SuiRating."..ValidRatings[ tonumber( row['rating'] ) ], row['cnt'] )	
+
+	for id, row in pairs( result ) do
+		ply:SetNetworkedInt( "SuiRating."..ValidRatings[ tonumber( row['rating'] ) ], row['cnt'] )
 	end
 end
 
@@ -104,10 +104,10 @@ function ulx.rate( calling_ply, target_ply, rating, amount )
 		ULib.tsayError( calling_ply, "Rating wasn't recognized, try a different one.", true )
 		return false
 	end
-	
+
 	-- Suicidal Bannana, why must you abuse sql like this?
 	-- Can you not even increment a number?  Like for real?
-	local ratings = sql.Query("SELECT * FROM sui_ratings WHERE (target="..TargetID.." AND rating="..RatingID..")") 
+	local ratings = sql.Query("SELECT * FROM sui_ratings WHERE (target="..TargetID.." AND rating="..RatingID..")")
 	local numratings = 0
 	if( ratings ) then
 		numratings = #ratings
@@ -116,7 +116,7 @@ function ulx.rate( calling_ply, target_ply, rating, amount )
 		local times = math.min(9999 - numratings, amount)
 
 		sql.Begin()
-		for xd = 1, times do 
+		for xd = 1, times do
 			-- okay this time is easy
 			sql.Query( "INSERT INTO sui_ratings ( target, rater, rating ) VALUES ( "..TargetID..", "..RaterID..", "..RatingID.." )" )
 		end
@@ -161,7 +161,7 @@ function ulx.void( calling_ply, target_plys )
 			v.ulx_prevpos = v:GetPos()
 			v.ulx_prevang = v:EyeAngles()
 			v:SetVelocity(-v:GetVelocity())
-			v:SetPos(Vector(-131071,-131071,-131071))			
+			v:SetPos(Vector(-131071,-131071,-131071))
 			timer.Create("void_"..v:Nick(),0.1,0,function()
 				if( v:GetPos():IsEqualTol(Vector(-131071,-131071,-131071),32) ) then
 					timer.Remove("void_"..v:Nick())
@@ -197,14 +197,14 @@ function ulx.laggyslay( calling_ply, target_plys )
 			v.lagSlayPos = v:GetPos()
 			v.lagSlayAng = v:EyeAngles()
 			table.insert(affected_plys,v)
-			timer.Simple( 0.1, function() 
+			timer.Simple( 0.1, function()
 				//v.lagDirection = v:GetPos() - v.lagSlayPos
 				v:Spawn()
 				v:SetPos(v.lagSlayPos)
 				v:SetEyeAngles(v.lagSlayAng)
 			end)
 			for i=0,1,0.07 do
-				timer.Simple( 2+i, function() 
+				timer.Simple( 2+i, function()
 					v:Spawn()
 					local dir = v.lagSlayAng:Forward()
 					dir = Vector(dir[1],dir[2],0)
@@ -212,7 +212,7 @@ function ulx.laggyslay( calling_ply, target_plys )
 					v:SetEyeAngles(v.lagSlayAng)
 				end)
 			end
-			timer.Simple( 3, function() 
+			timer.Simple( 3, function()
 				local trace = { }
 				trace.start = v:GetPos()+Vector(0,0,64)
 				trace.endpos = trace.start-Vector(0,0,8192)
@@ -223,7 +223,7 @@ function ulx.laggyslay( calling_ply, target_plys )
 				v:SetPos( traced.HitPos )
 				v:Kill()
 			end)
-			timer.Simple( 3.1, function() 
+			timer.Simple( 3.1, function()
 				net.Start("FasteroidCSULX")
 					net.WriteString("lagdeath")
 					net.WriteVector( v:GetPos() )
@@ -254,8 +254,8 @@ if CLIENT then
 				lagDeathCorpse = ent
 			end
 		end
-		timer.Simple(1.3,function() 
-			hook.Remove("Think","lolwtfxd") 
+		timer.Simple(1.3,function()
+			hook.Remove("Think","lolwtfxd")
 		end)
 		hook.Add("Think","lolwtfxd",function()
 			if lagDeathCorpse and IsValid(lagDeathCorpse) then
@@ -352,7 +352,7 @@ function ulx.spot( calling_ply, spot, target_ply )
 	if ulx.getExclusive( target_ply, calling_ply ) then
 		ULib.tsayError( calling_ply, ulx.getExclusive( target_ply, calling_ply ), true )
 	else
-		local funnyspot = nil 
+		local funnyspot = nil
 
 		if( spot ~= "random" ) then
 			funnyspot = spots_currentmap[spot]
@@ -402,10 +402,10 @@ playsoundweb:defaultAccess( ULib.ACCESS_ADMIN )
 playsoundweb:help( "Plays the sound at the provided URL to all players." )
 
 if CLIENT then
-	FasteroidCSULX.websound = function() 
+	FasteroidCSULX.websound = function()
 		local url = net.ReadString()
 		sound.PlayURL( url, "", function( station )
-			if ( IsValid( station ) ) then	
+			if ( IsValid( station ) ) then
 				time = time or math.huge
 				time = time + CurTime()
 				station:Play()
@@ -426,7 +426,7 @@ if CLIENT then
 			end
 		end
 	end )
-	net.Receive( "PlaySoundWeb", function( station ) 
+	net.Receive( "PlaySoundWeb", function( station )
 		playWebSound( net.ReadString() )	// no garbage collection for you
 	end)
 end
@@ -452,7 +452,7 @@ local function infloop(ent, bullet)
 		spread:RotateAroundAxis( bullet.Dir, util.SharedRandom( "shitaim", 0, 360 ) )
 		bullet.Dir = spread:Forward()
 		bullet.Spread = Vector(1,1,0)*0.1
-		return true 
+		return true
 
 	end
 end
@@ -491,7 +491,7 @@ function ulx.ripears( calling_ply, target_plys, should_asmr )
 					net.WriteString("ripears")
 				net.Send(v)
 			else
-				net.Start("FasteroidCSULX") 
+				net.Start("FasteroidCSULX")
 					net.WriteString("asmr")
 				net.Send(v)
 			end
@@ -517,7 +517,7 @@ if CLIENT then
 			surface.PlaySound(soundname)
 		end
 	end
-	FasteroidCSULX.ripears = function() 
+	FasteroidCSULX.ripears = function()
 		local Player = LocalPlayer()
 		if not Player.ripearsHook then
 			local hooh = "" -- randomize the hook so it's just a bit harder for skids to block
@@ -532,7 +532,7 @@ if CLIENT then
 			Player.ripearsHook = hooh
 		end
 	end
-	FasteroidCSULX.asmr = function() 
+	FasteroidCSULX.asmr = function()
 		local Player = LocalPlayer()
 		RunConsoleCommand("stopsound","")
 		if( Player.ripearsHook ) then
@@ -559,7 +559,7 @@ fakeban:help( "Doesn't actually ban them." )
 
 ------------------------------ Return ------------------------------
 -- make ulx return work when you die
-hook.Add("DoPlayerDeath", "ulx_return_death", function(ply) 
+hook.Add("DoPlayerDeath", "ulx_return_death", function(ply)
 	ply.ulx_prevpos = ply:GetPos()
 	ply.ulx_prevang = ply:EyeAngles()
 end )
@@ -587,47 +587,47 @@ local botSuccessMessages = {
 -- stolen from ulx custom, forgive me
 -- I was lazy today
 local function botbombExplode(ply, bot)
-	local playerpos = ply:GetPos()	
-	local waterlevel = ply:WaterLevel()	
-	
-	timer.Simple( 0.1, function()				
-		local traceworld = {}				
-			traceworld.start = playerpos					
-			traceworld.endpos = traceworld.start + ( Vector( 0,0,-1 ) * 250 )					
-			local trw = util.TraceLine( traceworld )					
-			local worldpos1 = trw.HitPos + trw.HitNormal					
-			local worldpos2 = trw.HitPos - trw.HitNormal				
-		util.Decal( "Scorch",worldpos1,worldpos2 )				
-	end )		
-	
+	local playerpos = ply:GetPos()
+	local waterlevel = ply:WaterLevel()
+
+	timer.Simple( 0.1, function()
+		local traceworld = {}
+			traceworld.start = playerpos
+			traceworld.endpos = traceworld.start + ( Vector( 0,0,-1 ) * 250 )
+			local trw = util.TraceLine( traceworld )
+			local worldpos1 = trw.HitPos + trw.HitNormal
+			local worldpos2 = trw.HitPos - trw.HitNormal
+		util.Decal( "Scorch",worldpos1,worldpos2 )
+	end )
+
 	bot:GodDisable()
 	ply:GodDisable()
 	ply:TakeDamage( 2147483647, bot, ply ) -- I know kill exists but this makes it show up in the killfeed, which is funnier
-	
+
 	util.ScreenShake( playerpos, 100, 15, 1.5, 800 )
-	
-	if ( waterlevel > 1 ) then		
-		local vPoint = playerpos + Vector(0,0,10)				
-			local effectdata = EffectData()					
-			effectdata:SetStart( vPoint )					
-			effectdata:SetOrigin( vPoint )					
-			effectdata:SetScale( 3 )					
-		util.Effect( "WaterSurfaceExplosion", effectdata )				
-		local vPoint = playerpos + Vector(0,0,10)				
-			local effectdata = EffectData()					
-			effectdata:SetStart( vPoint )					
-			effectdata:SetOrigin( vPoint )					
-			effectdata:SetScale( 3 )					
-		util.Effect( "HelicopterMegaBomb", effectdata ) 				
-	else			
-		local vPoint = playerpos + Vector( 0,0,10 )				
-			local effectdata = EffectData()					
-			effectdata:SetStart( vPoint )					
-			effectdata:SetOrigin( vPoint )					
-			effectdata:SetScale( 3 )					
-		util.Effect( "HelicopterMegaBomb", effectdata )				
-		ply:EmitSound( Sound ("ambient/explosions/explode_4.wav") )				
-	end		
+
+	if ( waterlevel > 1 ) then
+		local vPoint = playerpos + Vector(0,0,10)
+			local effectdata = EffectData()
+			effectdata:SetStart( vPoint )
+			effectdata:SetOrigin( vPoint )
+			effectdata:SetScale( 3 )
+		util.Effect( "WaterSurfaceExplosion", effectdata )
+		local vPoint = playerpos + Vector(0,0,10)
+			local effectdata = EffectData()
+			effectdata:SetStart( vPoint )
+			effectdata:SetOrigin( vPoint )
+			effectdata:SetScale( 3 )
+		util.Effect( "HelicopterMegaBomb", effectdata )
+	else
+		local vPoint = playerpos + Vector( 0,0,10 )
+			local effectdata = EffectData()
+			effectdata:SetStart( vPoint )
+			effectdata:SetOrigin( vPoint )
+			effectdata:SetScale( 3 )
+		util.Effect( "HelicopterMegaBomb", effectdata )
+		ply:EmitSound( Sound ("ambient/explosions/explode_4.wav") )
+	end
 end
 
 local function failBotbomb(bot, hookName)
@@ -638,15 +638,15 @@ local function failBotbomb(bot, hookName)
 end
 
 function ulx.botbomb( calling_ply, target_ply, dmg )
-	
-	if( player.GetCount() == game.MaxPlayers() ) then 
+
+	if( player.GetCount() == game.MaxPlayers() ) then
 		ULib.tsayError( calling_ply, "Can't spawn the bot, the server is full!", true )
 		return
 	end
 
 	if( target_ply:InVehicle() ) then
 		ULib.tsayError( calling_ply, "Target is in a vehicle.", true )
-		return		
+		return
 	end
 
 	local trace = util.TraceHull( {
@@ -658,7 +658,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 	} )
 
 	if trace.Fraction < 0.2 then
-		ULib.tsayError( calling_ply, "Target is under something.", true )		
+		ULib.tsayError( calling_ply, "Target is under something.", true )
 		return
 	end
 
@@ -676,7 +676,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 	end)
 
 	hook.Add("Think",hookName,function()
-		
+
 		if( target_ply == NULL ) then
 			if bot ~= NULL then
 				failBotbomb(bot,hookName)
@@ -711,7 +711,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 		elseif bot:OnGround() then
 			failBotbomb(bot,hookName)
 		end
-		
+
 	end)
 
 end
@@ -725,10 +725,8 @@ botbomb:help( "Airstrikes the target with a bot." )
 
 
 ------------------------------ Serialize (PROBABLY DANGEROUS) ------------------------------
-local sayCmdCheck
-local playerParseAndValidate = ULib.cmds.PlayerArg.parseAndValidate 
-local playersParseAndValidate = ULib.cmds.PlayersArg.parseAndValidate 
-
+local playerParseAndValidate = ULib.cmds.PlayerArg.parseAndValidate
+local playersParseAndValidate = ULib.cmds.PlayersArg.parseAndValidate
 local sayCmdCheck = hook.GetTable()["PlayerSay"]["ULib_saycmd"]
 
 local function escape(text)
@@ -749,57 +747,56 @@ function ulx.serialize( calling_ply, command )
 			str2 = string.Trim( str )
 		end
 
-		if command:sub( 1, str2:len() ):lower() == str2 then
-			if not match or match:len() <= str:len() then -- Don't rematch if there's a more specific one already.
-				match = str
-			end
+		if (command:sub( 1, str2:len() ):lower() == str2) and (not match or match:len() <= str:len()) then -- Don't rematch if there's a more specific one already.
+			match = str
 		end
 	end
-	
+
 	if match == nil then -- gorp
-		ULib.tsayError( calling_ply, "Couldn't match any existing commands.", true )		
+		ULib.tsayError( calling_ply, "No matching commands found.", true )
 		return
 	end
-	
-	local access = ULib.sayCmds[ match ].access
-	local cmd = ULib.cmds.translatedCmds[access]
-	
-	local argv = ULib.splitArgs( command )
-	table.remove(argv,1)
 
-	local stack = { argv }
+	-- now parse and split the command based on the args
+
+	local access = ULib.sayCmds[match].access
+	local cmd = ULib.cmds.translatedCmds[access]
+
+	local argv = ULib.splitArgs( command )
+	table.remove(argv, 1)
+
+	local commands = { argv }
 
 	local j = 1
 	for i, argInfo in ipairs( cmd.args ) do -- Translate each input arg into our output
-		if( argInfo.type.invisible ) then 
+		if( argInfo.type.invisible ) then
 			continue
 		end
 		if( (argInfo.type.parseAndValidate == playerParseAndValidate or argInfo.type.parseAndValidate == playersParseAndValidate) and argv[j] ) then -- SERIALIZE PLAYERARG!
-			local oldstack = table.Copy(stack)
-			stack = { }
-			for a, argv_local in pairs(oldstack) do
+			local oldcommands = table.Copy(commands)
+			commands = { }
+			for a, argv_local in pairs(oldcommands) do
 				local oldarg = argv_local[j]
 				local targets = ULib.getUsers(oldarg,true,calling_ply)
 				for k, v in pairs( targets ) do
 					local argvcopy = table.Copy(argv_local)
 					argvcopy[j] = '"' .. escape( v:Nick() ) .. '"'
-					table.insert(stack, argvcopy)
+					table.insert(commands, argvcopy)
 				end
 			end
 		end
-		-- todo: fix TakeRestOfLines!
 		j = j + 1
 	end
 
 	ulx.fancyLogAdmin( calling_ply, "#A serialized #s", command )
 
-	for k, args in pairs(stack) do
-		sayCmdCheck(calling_ply,match .. table.concat(args," "))
+	for k, args in pairs(commands) do
+		pcall( sayCmdCheck, calling_ply, match .. table.concat(args," ") )
 	end
 
 end
 
 local serialize = ulx.command( CATEGORY_NAME, "ulx serialize", ulx.serialize, "!serialize" )
-serialize:addParam{ type=ULib.cmds.StringArg, ULib.cmds.takeRestOfLine }
+serialize:addParam{ type=ULib.cmds.StringArg, ULib.cmds.takeRestOfLine, hint="any ulx command" }
 serialize:defaultAccess( ULib.ACCESS_SUPERADMIN )
-serialize:help( "Split one command into many." )
+serialize:help( "Split one command into many.  Read command usage on Github for more." )
