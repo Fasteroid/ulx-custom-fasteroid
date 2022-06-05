@@ -65,9 +65,9 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 
 - <b>ulx serialize</b> ("!serialize") `<command>`<br>
 &ensp;Splits one command into many. &nbsp;Useful for targeting multiple players with commands otherwise only accept one, eg `!return *`.<br>
-&ensp;Commands ran through serialize are ran as the caller to ensure no privilege escalation occurs.<br><br>
-&ensp;**IMPORTANT: Please be aware this command has NO SAFEGUARDS against things like** `!serialize !ban * 0 I am a serial killer!`<br>
-&ensp;**Such usage is COMPLETELY VALID and WILL ban everyone the caller is capable of banning. &nbsp;Assign it carefully.**
+&ensp;While this *should* work with *most* commands, I have observed (and failed to fix) it not working with some, eg. botbomb.<br>
+&ensp;Commands ran through serialize are ran as the caller to ensure no privilege escalation occurs.<br>
+&ensp;**IMPORTANT: This command has NO SAFEGUARDS against things like** `!serialize !ban * 0 I am a serial killer!`
 
 ## Bonus Improvements
 - Deaths now set your "previous location" so you can `ulx return` to it.
