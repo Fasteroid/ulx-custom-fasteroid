@@ -725,9 +725,18 @@ botbomb:help( "Airstrikes the target with a bot." )
 
 
 ------------------------------ Serialize (PROBABLY DANGEROUS) ------------------------------
-local playerParseAndValidate = ULib.cmds.PlayerArg.parseAndValidate
-local playersParseAndValidate = ULib.cmds.PlayersArg.parseAndValidate
-local sayCmdCheck = hook.GetTable()["PlayerSay"]["ULib_saycmd"]
+local playerParseAndValidate
+local playersParseAndValidate
+local sayCmdCheck
+
+hook.Add("think","ULX_Fasteroid_WaitForULib", function()
+	if(hook.GetTable()["PlayerSay"] and ULib) then
+		playerParseAndValidate = ULib.cmds.PlayerArg.parseAndValidate
+		playersParseAndValidate = ULib.cmds.PlayersArg.parseAndValidate
+		sayCmdCheck = hook.GetTable()["PlayerSay"]["ULib_saycmd"]
+		hook.Remove("ULX_Fasteroid_WaitForULib")
+	end
+end)
 
 local function escape(text)
 	text = string.Replace(text,"\\","\\\\")
