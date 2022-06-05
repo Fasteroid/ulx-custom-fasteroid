@@ -63,6 +63,12 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;Airstrikes the target with a bot. &nbsp;The bot explodes when it lands and will kill the target if it lands on them.<br>
 &ensp;The bot has <i>some</i> airstrafing capabilities but will probably miss if dropped on a moving target.
 
+- <b>ulx serialize</b> ("!serialize") `<command>`<br>
+&ensp;Splits one command into many. &nbsp;Useful for targeting multiple players with commands otherwise only accept one, eg `!return *`.<br>
+&ensp;Commands ran through serialize are ran as the caller to ensure no privilege escalation occurs.<br><br>
+&ensp;**IMPORTANT: Please be aware this command has NO SAFEGUARDS against things like** `!serialize !ban * 0 I am a serial killer!`<br>
+&ensp;**Such usage is COMPLETELY VALID and WILL ban everyone the caller is capable of banning. &nbsp;Assign it carefully.**
+
 ## Bonus Improvements
 - Deaths now set your "previous location" so you can `ulx return` to it.
 
