@@ -729,7 +729,7 @@ local playerParseAndValidate
 local playersParseAndValidate
 local sayCmdCheck
 
-hook.Add("think","ULX_Fasteroid_WaitForULib", function()
+hook.Add("Think","ULX_Fasteroid_WaitForULib", function()
 	if(hook.GetTable()["PlayerSay"] and ULib) then
 		playerParseAndValidate = ULib.cmds.PlayerArg.parseAndValidate
 		playersParseAndValidate = ULib.cmds.PlayersArg.parseAndValidate
