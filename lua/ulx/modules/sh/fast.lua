@@ -633,7 +633,16 @@ end
 local function failBotbomb(bot, hookName)
 	bot:Say(botFailMessages[math.random(#botFailMessages)])
 	botbombExplode(bot,bot)
-	bot:Kick()
+	timer.Simple(0.5, function() if bot~=NULL then bot:Kick() end end)
+	hook.Remove("Think",hookName)
+end
+
+local function succBotbomb(bot, hookName)
+	bot:SetPos(target_ply:GetPos() + Vector(0,0,100))
+	bot:Say(botSuccessMessages[math.random(#botSuccessMessages)])
+	botbombExplode(target_ply,bot)
+	bot:Kill()
+	timer.Simple(0.5, function() if bot~=NULL then bot:Kick() end end)
 	hook.Remove("Think",hookName)
 end
 
@@ -702,12 +711,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 		} )
 
 		if( collisionCheck.Hit ) then
-			bot:SetPos(target_ply:GetPos() + Vector(0,0,100))
-			bot:Say(botSuccessMessages[math.random(#botSuccessMessages)])
-			botbombExplode(target_ply,bot)
-			bot:Kill()
-			timer.Simple(0.5, function() if bot~=NULL then bot:Kick() end end)
-			hook.Remove("Think",hookName)
+			succBotbomb(bot,hookName)
 		elseif bot:OnGround() then
 			failBotbomb(bot,hookName)
 		end
