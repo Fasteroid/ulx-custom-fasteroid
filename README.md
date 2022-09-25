@@ -69,6 +69,10 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;Commands ran through serialize are ran as the caller to protect against privilege escalation.
 &ensp;<table><tr><td>**WARNING: People can do things like `!serialize !ban * 0 I am a serial killer!` with this!**<br>*Be careful when granting !serialize to those with ban access.*</td></tr></table>
 
+- <b>ulx flushechos</b> ("!flushechos")<br>
+&ensp;Flushes all queued log echoes. &ensp;Useful if they've become backlogged due to spam.<br>
+&ensp;All will still be visible in the ulx log files.
+
 ## Bonus Improvements
 - Deaths now set your "previous location" so you can `ulx return` to it.
 

@@ -813,3 +813,38 @@ local serialize = ulx.command( CATEGORY_NAME, "ulx serialize", ulx.serialize, "!
 serialize:addParam{ type=ULib.cmds.StringArg, ULib.cmds.takeRestOfLine, hint="any ulx command" }
 serialize:defaultAccess( ULib.ACCESS_SUPERADMIN )
 serialize:help( "Split one command into many.  Read command usage on Github for more." )
+
+------------------------------ Flush Echos ------------------------------
+
+local ulx_echo_buffer = nil -- ulib/lua/ulib/shared/util.lua, line 459
+function setupFlushEchoes(onThink)
+	if not ulx_echo_buffer then
+		_, ulx_echo_buffer = debug.getupvalue(onThink,1)
+		hook.Remove("Think","ULX_Fasteroid_GetULibEchoBuffer")
+	end
+end
+
+hook.Add("Think","ULX_Fasteroid_GetULibEchoBuffer",function()
+	local onThink = hook.GetTable()["Think"]["ULibQueueThink"]
+	if onThink then
+		setupFlushEchoes(onThink)
+	end
+end)
+
+function ulx.flushechos(calling_ply)
+	local f = hook.GetTable()["Think"]["ULibQueueThink"]
+	if f then
+		setupFlushEchoes(f) -- just in case someone runs this stupidly early
+		local buffer = ulx_echo_buffer["ULibChats"]
+		if buffer then
+			local amount = math.floor(#ulx_echo_buffer["ULibChats"] / #player.GetHumans())
+			table.Empty(buffer)
+			ulx.fancyLogAdmin( calling_ply, "#A flushed #i remaining log echoes from the queue", amount )
+			return
+		end
+	end
+	ULib.tsayError( calling_ply, "There are no echoes in the queue.", true )
+end
+local flushechos = ulx.command( CATEGORY_NAME, "ulx flushechos", ulx.flushechos, "!flushechos")
+flushechos:defaultAccess( ULib.ACCESS_ADMIN )
+flushechos:help( "Flushes all queued log echoes.  Useful if they've become backlogged due to spam." )
