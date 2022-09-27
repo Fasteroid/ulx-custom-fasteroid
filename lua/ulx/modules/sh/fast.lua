@@ -831,7 +831,7 @@ hook.Add("Think","ULX_Fasteroid_GetULibEchoBuffer",function()
 	end
 end)
 
-function ulx.flushechos(calling_ply)
+function ulx.flushlogs(calling_ply)
 	local f = hook.GetTable()["Think"]["ULibQueueThink"]
 	if f then
 		setupFlushEchoes(f) -- just in case someone runs this stupidly early
@@ -843,8 +843,8 @@ function ulx.flushechos(calling_ply)
 			return
 		end
 	end
-	ULib.tsayError( calling_ply, "There are no echoes in the queue.", true )
+	ULib.tsayError( calling_ply, "There are no log echoes in the queue.", true )
 end
-local flushechos = ulx.command( CATEGORY_NAME, "ulx flushechos", ulx.flushechos, "!flushechos")
-flushechos:defaultAccess( ULib.ACCESS_ADMIN )
-flushechos:help( "Flushes all queued log echoes.  Useful if they've become backlogged due to spam." )
+local flushlogs = ulx.command( CATEGORY_NAME, "ulx flushlogs", ulx.flushlogs, "!flushlogs")
+flushlogs:defaultAccess( ULib.ACCESS_ADMIN )
+flushlogs:help( "Flushes all queued log echoes.  Useful if they've become backlogged due to spam." )
