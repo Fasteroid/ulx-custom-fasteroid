@@ -73,6 +73,9 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;Flushes all queued log echoes. &ensp;Useful if they've become backlogged due to spam.<br>
 &ensp;All will still be visible `data/ulx_logs`.
 
+- <b>ulx freezeprops</b> ("!freezeprops") `<player>`<br>
+&ensp;Freezes all entities owned by the target.
+
 ## Bonus Improvements
 - Deaths now set your "previous location" so you can `ulx return` to it.
 
