@@ -848,3 +848,24 @@ end
 local flushlogs = ulx.command( CATEGORY_NAME, "ulx flushlogs", ulx.flushlogs, "!flushlogs")
 flushlogs:defaultAccess( ULib.ACCESS_ADMIN )
 flushlogs:help( "Flushes all queued log echoes.  Useful if they've become backlogged due to spam." )
+
+------------------------------ Freeze Props ------------------------------
+function ulx.freezeprops( calling_ply, target_ply )
+	local count = 0
+
+	for _, ent in ipairs( ents.GetAll() ) do
+		local phys_obj = ent:GetPhysicsObject()
+
+		if phys_obj:IsValid() and ( ent:GetCreator() == target_ply or ent.SPPOwner == target_ply ) then
+			phys_obj:EnableMotion( false )
+			count = count + 1
+		end
+	end
+
+	ulx.fancyLogAdmin( calling_ply, "#A froze #i physics entities owned by #T", count, target_ply )
+end
+
+local freezeprops = ulx.command( CATEGORY_NAME, "ulx freezeprops", ulx.freezeprops, "!freezeprops" )
+freezeprops:addParam{ type = ULib.cmds.PlayerArg }
+freezeprops:defaultAccess( ULib.ACCESS_ADMIN )
+freezeprops:help( "Freezes all entities owned by the target" )
