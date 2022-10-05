@@ -851,7 +851,10 @@ flushlogs:help( "Flushes all queued log echoes.  Useful if they've become backlo
 
 ------------------------------ Block tools for specific players ------------------------------
 
-local BTools = { blocked = {} }
+local BTools = {
+	blocked = {},
+	all_tools = {}
+}
 
 if SERVER then
 	-- load the blacklist stored on disk
@@ -900,19 +903,6 @@ if SERVER then
 	end)
 end
 
-do
-	-- populate the tools list (for autocomplete)
-	local tools = {}
-
-	for k, _ in pairs( weapons.GetStored( "gmod_tool" ).Tool ) do
-		tools[#tools + 1] = k
-	end
-
-	table.sort(tools)
-
-	BTools.tools = tools
-end
-
 function ulx.blocktool( calling_ply, target_plys, tool_class, b_unblock )
 	for _, ply in ipairs( target_plys ) do
 		if b_unblock then
@@ -931,8 +921,18 @@ end
 
 local blocktool = ulx.command( CATEGORY_NAME, "ulx blocktool", ulx.blocktool, "!blocktool" )
 blocktool:addParam{ type = ULib.cmds.PlayersArg }
-blocktool:addParam{ type = ULib.cmds.StringArg, completes = BTools.tools, hint = "tool class" }
+blocktool:addParam{ type = ULib.cmds.StringArg, completes = BTools.all_tools, hint = "tool class" }
 blocktool:addParam{ type = ULib.cmds.BoolArg, invisible = true }
 blocktool:defaultAccess( ULib.ACCESS_ADMIN )
 blocktool:help( "Blocks a tool for the target(s)" )
 blocktool:setOpposite( "ulx unblocktool", {_, _, _, true}, "!unblocktool" )
+
+hook.Add("InitPostEntity", "blocktool_populate_autocomplete", function()
+	-- populate the tools list (for autocomplete)
+
+	for k, _ in pairs( weapons.GetStored( "gmod_tool" ).Tool ) do
+		BTools.all_tools[#BTools.all_tools + 1] = k
+	end
+
+	table.sort(BTools.all_tools)
+end)
