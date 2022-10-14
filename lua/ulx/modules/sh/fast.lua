@@ -831,7 +831,7 @@ hook.Add("Think","ULX_Fasteroid_GetULibEchoBuffer",function()
 	end
 end)
 
-function ulx.flushlogs(calling_ply)
+function ulx.purge(calling_ply)
 	local f = hook.GetTable()["Think"]["ULibQueueThink"]
 	if f then
 		setupFlushEchoes(f) -- just in case someone runs this stupidly early
@@ -845,11 +845,11 @@ function ulx.flushlogs(calling_ply)
 	end
 	ULib.tsayError( calling_ply, "There are no log echoes in the queue.", true )
 end
-local flushlogs = ulx.command( CATEGORY_NAME, "ulx flushlogs", ulx.flushlogs, "!flushlogs")
-flushlogs:defaultAccess( ULib.ACCESS_ADMIN )
-flushlogs:help( "Flushes all queued log echoes.  Useful if they've become backlogged due to spam." )
+local purge = ulx.command( CATEGORY_NAME, "ulx purge", ulx.purge, "!purge")
+purge:defaultAccess( ULib.ACCESS_ADMIN )
+purge:help( "Purges command echo backlog.  Useful for cleaning up admining gone-wrong." )
 
------------------------------- Block tools for specific players ------------------------------
+------------------------------ StyledStrike: Block Tools ------------------------------
 
 local BTools = {
 	blocked = {},
