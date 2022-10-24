@@ -900,7 +900,7 @@ if SERVER then
 
 	hook.Add("CanTool", "ulxcustom_check_tool_block", function( ply, _, tool )
 		if BTools:IsBlocked( ply, tool ) then return false end
-	end)
+	end, HOOK_HIGH)
 end
 
 function ulx.blocktool( calling_ply, target_plys, tool_class, b_unblock )
