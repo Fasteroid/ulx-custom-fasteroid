@@ -70,7 +70,7 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;<table><tr><td>**WARNING: People can do things like `!serialize !ban * 0 I am a serial killer!` with this!**<br>*Be careful when granting !serialize to those with ban access.*</td></tr></table>
 
 - <b>ulx purge</b> ("!purge")<br>
-&ensp;Purges command echo backlog. &ensp;Useful for cleaning up admining gone-wrong."<br>
+&ensp;Purges command echo backlog. &ensp;Useful for cleaning up administration gone-wrong.<br>
 &ensp;All will still be visible in `data/ulx_logs`.
 
 - <b>ulx blocktool</b> ("!blocktool") `<players>` `<tool class>`<br>
