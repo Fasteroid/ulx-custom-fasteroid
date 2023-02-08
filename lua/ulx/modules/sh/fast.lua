@@ -632,10 +632,11 @@ local function botbombExplode(ply, bot)
 end
 
 local function failBotbomb(bot, hookName)
+	hook.Remove("Think",hookName)
+	if not IsValid(bot) then return end
 	bot:Say(botFailMessages[math.random(#botFailMessages)])
 	botbombExplode(bot,bot)
-	timer.Simple(0.5, function() if bot~=NULL then bot:Kick() end end)
-	hook.Remove("Think",hookName)
+	timer.Simple(0.5, function() if IsValid(bot) then bot:Kick() end end)
 end
 
 local function succBotbomb(bot, target_ply, hookName)
@@ -678,21 +679,20 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 	bot:GodEnable()
 	bot:SetPos(trace.HitPos)
 
-	local hookName = "botbomb_"..target_ply:Nick()
+	local hookName = "botbomb_"..math.random()
 
-	timer.Create(hookName,10,1,function() -- remove after 10 seconds if it doesn't find them
-		if( bot == NULL ) then return end
+	timer.Create(hookName, 10, 1, function() -- remove after 10 seconds if it doesn't find them
 		failBotbomb(bot,hookName)
 	end)
 
 	hook.Add("Think",hookName,function()
 
-		if( target_ply == NULL ) then
-			if bot ~= NULL then
-				failBotbomb(bot,hookName)
-			end
-		elseif( bot == NULL ) then
-			hook.Remove("Think",hookName)
+		-- make absolutely sure both of these are valid
+		if not IsValid(target_ply) then
+			failBotbomb(bot,hookName)
+		end
+		if not IsValid(bot) then
+			failBotbomb(bot,hookName)
 		end
 
 		local aimVec = (target_ply:GetShootPos() - bot:GetShootPos())
