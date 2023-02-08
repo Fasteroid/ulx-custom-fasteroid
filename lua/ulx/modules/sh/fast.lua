@@ -978,7 +978,7 @@ function ulx.ragmaul(calling_ply, target, attacker)
 			ulx.ragdoll(attacker, {attacker}, true)
 			attacker:SetVelocity( attacker:GetVelocity() * -0.9 ) -- prevent them from flying off somewhere
 		else
-			ulx.fancyLogAdmin( attacker, "#A finished attacking #T", victim )
+			ulx.fancyLogAdmin( attacker, "#A finished attacking #T", target )
 		end
 	end
 
