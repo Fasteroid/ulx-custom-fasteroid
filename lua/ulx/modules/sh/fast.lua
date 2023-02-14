@@ -700,7 +700,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 		aimVec[3] = 0
 		local damping = bot:GetVelocity()
 		damping[3] = 0
-		bot:SetVelocity( aimVec:GetNormalized()*20 - damping * 0.1  )
+		bot:SetVelocity( aimVec:GetNormalized()*50 - damping * 0.05  )
 
 		local collisionCheck = util.TraceHull( {
 			start = bot:GetPos(),
