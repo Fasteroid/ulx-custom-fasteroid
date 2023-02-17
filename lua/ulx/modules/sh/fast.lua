@@ -956,7 +956,7 @@ function ulx.ragmaul(calling_ply, target, attacker)
 		attacker.ulx_prevpos = attacker:GetPos() -- make sure this works with return since they'll move
 		attacker.ulx_prevang = attacker:EyeAngles()
 		setCanLog(false)
-			ulx.ragdoll(attacker, {attacker}, false) -- do it silently though
+			pcall( ulx.ragdoll, attacker, {attacker}, false ) -- do it silently though
 		setCanLog(true)
 	end
 
@@ -985,7 +985,7 @@ function ulx.ragmaul(calling_ply, target, attacker)
 	if not IsValid(bones.pelvis) then
 		if( appliedRagdoll ) then -- undo it
 			setCanLog(false)
-				ulx.ragdoll(attacker, {attacker}, true)
+				pcall( ulx.ragdoll, attacker, {attacker}, true )
 			setCanLog(true)			
 		end
 		ULib.tsayError( calling_ply, "Something went horribly wrong with the attacker's ragdoll!", true ) return
