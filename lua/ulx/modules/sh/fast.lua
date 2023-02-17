@@ -14,6 +14,7 @@ if CLIENT then
 	end)
 end
 
+
 ------------------------------ Scare ------------------------------
 function ulx.scare( calling_ply, target_plys, dmg )
 	local affected_plys = {}
@@ -35,6 +36,7 @@ scare:addParam{ type=ULib.cmds.PlayersArg }
 scare:addParam{ type=ULib.cmds.NumArg, min=0, default=0, hint="damage", ULib.cmds.optional, ULib.cmds.round }
 scare:defaultAccess( ULib.ACCESS_ADMIN )
 scare:help( "Slaps target(s) with the stalker scream sound and inflicts damage." )
+
 
 ------------------------------ Desync ------------------------------
 function ulx.desync( calling_ply, target_plys, sync )
@@ -62,8 +64,8 @@ desync:defaultAccess( ULib.ACCESS_ADMIN )
 desync:help( "Desynchronizes target(s) from their body, causing many strange effects." )
 desync:setOpposite("ulx resync", {_, _, true}, "!resync")
 
------------------------------- SUI Scoreboard Rate ------------------------------
 
+------------------------------ SUI Scoreboard Rate ------------------------------
 local ValidRatings = { "naughty", "smile", "love", "artistic", "gold_star", "builder", "gay", "informative", "friendly", "lol", "curvey", "best_landvehicle", "best_airvehicle", "stunter", "god" }
 
 local function GetRatingID( name )
@@ -181,6 +183,7 @@ void:addParam{ type=ULib.cmds.PlayersArg }
 void:defaultAccess( ULib.ACCESS_ADMIN )
 void:help( "Sends target(s) to the void.  Returning to the map from the void is very difficult, but technically possible." )
 
+
 ------------------------------ Lagged Slay ------------------------------
 function ulx.laggyslay( calling_ply, target_plys )
 	local affected_plys = {}
@@ -267,6 +270,7 @@ if CLIENT then
 	end
 end
 
+
 ------------------------------ Max Physics Speed ------------------------------
 local maxspeed
 function ulx.maxspeed( calling_ply, speed )
@@ -283,6 +287,7 @@ maxspeed = ulx.command( CATEGORY_NAME, "ulx maxphyspeed", ulx.maxspeed, "!maxphy
 maxspeed:addParam{ type=ULib.cmds.NumArg, min = 0, max = 2147483647, hint="speed" }
 maxspeed:defaultAccess( ULib.ACCESS_SUPERADMIN )
 maxspeed:help( "Sets the engine's max speed for physics objects." )
+
 
 ------------------------------ Spots ------------------------------
 local spots = {}
@@ -388,8 +393,8 @@ spot:addParam{ type=ULib.cmds.PlayerArg, ULib.cmds.optional }
 spot:defaultAccess( ULib.ACCESS_ALL )
 spot:help( "Teleports the target to the previously set spot. Use the 'random' spot to choose randomly from all spots." )
 
------------------------------- Playsound Web ------------------------------
 
+------------------------------ Playsound Web ------------------------------
 function ulx.playsoundweb( calling_ply, snd )
 	net.Start( "FasteroidCSULX" )
 		net.WriteString( "websound" )
@@ -432,8 +437,9 @@ if CLIENT then
 	end)
 end
 
------------------------------- "Bad Aim" ------------------------------
 
+
+------------------------------ "Bad Aim" ------------------------------
 local PlayerMeta = FindMetaTable("Player")
 function PlayerMeta:getShitAim( )
 	return self:GetNW2Bool( "shitaim", false )
@@ -445,20 +451,18 @@ if SERVER then
 	end
 end
 
-local function infloop(ent, bullet)
+local function aimModifier(ent, bullet)
 	if( IsValid(ent) and ent:IsPlayer() and ent:getShitAim() ) then
-
 		local theta = CurTime() * 4200
 		local spread = bullet.Dir:Angle() + Angle(15,0,0)
 		spread:RotateAroundAxis( bullet.Dir, util.SharedRandom( "shitaim", 0, 360 ) )
 		bullet.Dir = spread:Forward()
 		bullet.Spread = Vector(1,1,0)*0.1
 		return true
-
 	end
 end
 
-hook.Add( "EntityFireBullets", "ulx_shitaim", infloop )
+hook.Add( "EntityFireBullets", "ulx_shitaim", aimModifier )
 
 function ulx.badaim( calling_ply, target_plys, mode )
 
@@ -543,6 +547,7 @@ if CLIENT then
 	end
 end
 
+
 ------------------------------ Fake Ban ------------------------------
 function ulx.fakeban(calling_ply, target_ply, minutes, reason)
 	local time = "for #s"
@@ -558,12 +563,6 @@ fakeban:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional, U
 fakeban:defaultAccess( ULib.ACCESS_ADMIN )
 fakeban:help( "Doesn't actually ban them." )
 
------------------------------- Return ------------------------------
--- make ulx return work when you die
-hook.Add("DoPlayerDeath", "ulx_return_death", function(ply)
-	ply.ulx_prevpos = ply:GetPos()
-	ply.ulx_prevang = ply:EyeAngles()
-end )
 
 ------------------------------ Bot Bomb ------------------------------
 local botNames = {
@@ -728,7 +727,6 @@ botbomb:defaultAccess( ULib.ACCESS_SUPERADMIN )
 botbomb:help( "Airstrikes the target with a bot." )
 
 
-
 ------------------------------ Serialize (PROBABLY DANGEROUS) ------------------------------
 local playerParseAndValidate
 local playersParseAndValidate
@@ -816,7 +814,6 @@ serialize:defaultAccess( ULib.ACCESS_SUPERADMIN )
 serialize:help( "Split one command into many.  Read command usage on Github for more." )
 
 
-
 ------------------------------ Flush Echos ------------------------------
 local ulx_echo_buffer = nil -- ulib/lua/ulib/shared/util.lua, line 459
 function setupFlushEchoes(onThink)
@@ -850,7 +847,6 @@ end
 local purge = ulx.command( CATEGORY_NAME, "ulx purge", ulx.purge, "!purge")
 purge:defaultAccess( ULib.ACCESS_ADMIN )
 purge:help( "Purges command echo backlog.  Useful for cleaning up administrating gone-wrong." )
-
 
 
 ------------------------------ Ragmaul ------------------------------
@@ -1010,8 +1006,8 @@ ragmaul:addParam{ type=ULib.cmds.PlayerArg, ULib.cmds.optional, hint="attacker" 
 ragmaul:defaultAccess( ULib.ACCESS_ADMIN )
 ragmaul:help( "Mauls the target with the attacker's ragdoll." )
 
------------------------------- StyledStrike: Block Tools ------------------------------
 
+------------------------------ StyledStrike: Block Tools ------------------------------
 local BTools = {
 	blocked = {},
 	all_tools = {}
