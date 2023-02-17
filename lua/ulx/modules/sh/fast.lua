@@ -438,7 +438,6 @@ if CLIENT then
 end
 
 
-
 ------------------------------ "Bad Aim" ------------------------------
 local PlayerMeta = FindMetaTable("Player")
 function PlayerMeta:getShitAim( )
@@ -461,7 +460,6 @@ local function aimModifier(ent, bullet)
 		return true
 	end
 end
-
 hook.Add( "EntityFireBullets", "ulx_shitaim", aimModifier )
 
 function ulx.badaim( calling_ply, target_plys, mode )
@@ -565,23 +563,31 @@ fakeban:help( "Doesn't actually ban them." )
 
 
 ------------------------------ Bot Bomb ------------------------------
-local botNames = {
-	"death",
-	"bomb",
-	"slave"
-}
-local botFailMessages = {
-	"FUCK",
-	"aGH",
-	"NO",
-	"rip",
-}
-local botSuccessMessages = {
-	"HA",
-	"GOTCHA",
-	"YEET",
-	"FUCKED",
-	"GONE"
+
+local BOTBOMB_CONSTS = {
+	botNames = {
+		"death",
+		"bomb",
+		"exploder",
+		"doomfist",
+		"nuker"
+	},
+	botFailMessages = {
+		"FUCK",
+		"aGH",
+		"NO",
+		"rip",
+		"bruh",
+		"h"
+	},
+	botSuccessMessages = {
+		"HA",
+		"GOTCHA",
+		"YEET",
+		"FUCKED",
+		"GONE",
+		"BOOM",
+	}
 }
 
 -- stolen from ulx custom, forgive me
@@ -633,6 +639,7 @@ end
 local function failBotbomb(bot, hookName)
 	hook.Remove("Think",hookName)
 	if not IsValid(bot) then return end
+	local botFailMessages = BOTBOMB_CONSTS.botFailMessages
 	bot:Say(botFailMessages[math.random(#botFailMessages)])
 	botbombExplode(bot,bot)
 	timer.Simple(0.5, function() if IsValid(bot) then bot:Kick() end end)
@@ -640,6 +647,7 @@ end
 
 local function succBotbomb(bot, target_ply, hookName)
 	bot:SetPos(target_ply:GetPos() + Vector(0,0,100))
+	local botSuccessMessages = BOTBOMB_CONSTS.botSuccessMessages
 	bot:Say(botSuccessMessages[math.random(#botSuccessMessages)])
 	botbombExplode(target_ply,bot)
 	bot:Kill()
@@ -674,6 +682,7 @@ function ulx.botbomb( calling_ply, target_ply, dmg )
 
 	ulx.fancyLogAdmin( calling_ply, "#A called in an airstrike on #T", target_ply )
 
+	local botNames = BOTBOMB_CONSTS.botNames
 	local bot = player.CreateNextBot( botNames[math.random(#botNames)] )
 	bot:GodEnable()
 	bot:SetPos(trace.HitPos)
@@ -882,11 +891,19 @@ local function propelBoneTowards(physobj, dir, speed, violence, mode)
 	physobj:ApplyForceCenter( (dir * speed - physobj:GetVelocity() * violence) * physobj:GetMass() )
 end
 
-local SPEED = 1500
-local HULLMAX = Vector(8,8,8)
-local HULLMIN = Vector(-8,-8,-8)
-local WALLAVOID = 32
+local RAGMAUL_CONSTS = {
+	SPEED = 1500,
+	HULLMAX = Vector(8,8,8),
+	HULLMIN = Vector(-8,-8,-8),
+	WALLAVOID = 32
+}
+
 function ragmaulThink(target, attacker, bones, rag)
+
+	local SPEED = RAGMAUL_CONSTS.SPEED
+	local HULLMAX = RAGMAUL_CONSTS.HULLMAX
+	local HULLMIN = RAGMAUL_CONSTS.HULLMIN
+	local WALLAVOID = RAGMAUL_CONSTS.WALLAVOID
 
 	local pelvispos = bones.pelvis:GetPos()
 	local targetpos = (target:GetShootPos())
@@ -1093,3 +1110,11 @@ hook.Add("InitPostEntity", "blocktool_populate_autocomplete", function()
 
 	table.sort(BTools.all_tools)
 end)
+
+
+------------------------------ Improvements: Return ------------------------------
+-- make ulx return work when you die
+hook.Add("DoPlayerDeath", "ulx_return_death", function(ply)
+	ply.ulx_prevpos = ply:GetPos()
+	ply.ulx_prevang = ply:EyeAngles()
+end )
