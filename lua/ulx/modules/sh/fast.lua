@@ -1131,7 +1131,7 @@ for k, v in ipairs(ulx.cmdsByCategory["Fun"]) do
 	end
 end
 
-ragdollCmdObj.fn = function(calling_ply, target_plys, should_unragdoll) 
+local newRagdoll = function(calling_ply, target_plys, should_unragdoll) 
 	OldUlxRagdoll(calling_ply, target_plys, should_unragdoll) -- call original
 	local affected_plys = {}
 
@@ -1153,6 +1153,8 @@ ragdollCmdObj.fn = function(calling_ply, target_plys, should_unragdoll)
 	net.Broadcast()
 
 end
+ragdollCmdObj.fn = newRagdoll
+ulx.ragdoll = newRagdoll
 
 if CLIENT then
 	FasteroidCSULX.requestRagdoll = function()
