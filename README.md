@@ -82,6 +82,7 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 
 ## Bonus Improvements
 - Deaths now set your "previous location" so you can `ulx return` to it.
+- Ragdolls created by `ulx ragdoll` now inherit player colors correctly.
 
 ## Workshop Links to Dependencies
  - [ULX](http://steamcommunity.com/sharedfiles/filedetails/?id=557962280) | `557962280`
