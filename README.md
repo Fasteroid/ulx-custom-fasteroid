@@ -28,7 +28,11 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 
 - <b>ulx maxphyspeed</b> ("!maxphyspeed") `<speed: default = dynamic*>`<br>
 &ensp;Sets the engine's max speed for physics objects.<br>
-&ensp;*The default value of `speed` will be set to the last value the max speed was before the use of this command.
+&ensp;*The default value of `speed` will change whenever something other than this command modifies it
+
+- <b>ulx maxangspeed</b> ("!maxangspeed") `<speed: default = dynamic*>`<br>
+&ensp;Sets the engine's max rotational speed for physics objects.<br>
+&ensp;*The default value of `speed` will change whenever something other than this command modifies it
 
 - <b>ulx setspot</b> ("!setspot") `<name>`<br>
 &ensp;Sets a restart-persistent, map-specific spot players can teleport to.<br>
