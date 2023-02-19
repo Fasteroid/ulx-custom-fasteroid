@@ -314,6 +314,7 @@ maxangspeed:defaultAccess( ULib.ACCESS_SUPERADMIN )
 maxangspeed:help( "Sets the engine's max rotational speed for physics objects." )
 
 local function setPhysFuncDefaults(settings)
+	if not settings then return end -- wtf?
 	maxspeed.args[2].default    = settings.MaxVelocity
 	maxangspeed.args[2].default = settings.MaxAngularVelocity
 end
@@ -1159,8 +1160,6 @@ end )
 
 ------------------------------ Improvements: Ragdoll ------------------------------
 -- apply player colors
-
-
 OldUlxRagdoll = OldUlxRagdoll or ulx.ragdoll
 
 local newRagdoll = function(calling_ply, target_plys, should_unragdoll) 
@@ -1190,10 +1189,8 @@ end
 hook.Add("Think","ULX_Fasteroid_WaitForULXRagdoll", function()
 	for _, cmd in ipairs(ulx.cmdsByCategory["Fun"]) do 
 		if cmd.cmd ~= "ulx ragdoll" then continue end
-		
 		cmd.fn = newRagdoll
 		hook.Remove("Think","ULX_Fasteroid_WaitForULXRagdoll")
-
 		return
 	end
 end)
