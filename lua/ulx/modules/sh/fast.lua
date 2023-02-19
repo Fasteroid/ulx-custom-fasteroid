@@ -1159,14 +1159,9 @@ end )
 
 ------------------------------ Improvements: Ragdoll ------------------------------
 -- apply player colors
+
+
 OldUlxRagdoll = OldUlxRagdoll or ulx.ragdoll
-local ragdollCmdObj
-for k, v in ipairs(ulx.cmdsByCategory["Fun"]) do
-	if v.cmd == "ulx ragdoll" then
-		ragdollCmdObj = v
-		break
-	end
-end
 
 local newRagdoll = function(calling_ply, target_plys, should_unragdoll) 
 	OldUlxRagdoll(calling_ply, target_plys, should_unragdoll) -- call original
@@ -1190,7 +1185,19 @@ local newRagdoll = function(calling_ply, target_plys, should_unragdoll)
 	net.Broadcast()
 
 end
-ragdollCmdObj.fn = newRagdoll
+
+
+hook.Add("Think","ULX_Fasteroid_WaitForULXRagdoll", function()
+	for _, cmd in ipairs(ulx.cmdsByCategory["Fun"]) do 
+		if cmd.cmd ~= "ulx ragdoll" then continue end
+		
+		cmd.fn = newRagdoll
+		hook.Remove("Think","ULX_Fasteroid_WaitForULXRagdoll")
+
+		return
+	end
+end)
+
 ulx.ragdoll = newRagdoll
 
 if CLIENT then
