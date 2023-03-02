@@ -1160,7 +1160,6 @@ end )
 
 ------------------------------ Improvements: Ragdoll ------------------------------
 -- apply player colors
-OldUlxRagdoll = OldUlxRagdoll or ulx.ragdoll
 
 local newRagdoll = function(calling_ply, target_plys, should_unragdoll) 
 	OldUlxRagdoll(calling_ply, target_plys, should_unragdoll) -- call original
@@ -1189,13 +1188,17 @@ end
 hook.Add("Think","ULX_Fasteroid_WaitForULXRagdoll", function()
 	for _, cmd in ipairs(ulx.cmdsByCategory["Fun"]) do 
 		if cmd.cmd ~= "ulx ragdoll" then continue end
+
+		OldUlxRagdoll = OldUlxRagdoll or ulx.ragdoll
+
 		cmd.fn = newRagdoll
+		ulx.ragdoll = newRagdoll
+
 		hook.Remove("Think","ULX_Fasteroid_WaitForULXRagdoll")
 		return
 	end
 end)
 
-ulx.ragdoll = newRagdoll
 
 if CLIENT then
 	FasteroidCSULX.requestRagdoll = function()
