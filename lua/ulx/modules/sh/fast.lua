@@ -896,6 +896,23 @@ purge:defaultAccess( ULib.ACCESS_ADMIN )
 purge:help( "Purges command echo backlog.  Useful for cleaning up administrating gone-wrong." )
 
 
+------------------------------ Fake Disconnect ------------------------------
+function ulx.fakedc(calling_ply, target_ply)
+	local ulib_sorted_hooks = hook.GetULibTable()["PlayerDisconnected"]
+	for i=-1, 2 do -- skip -2 since that will de-auth the target_ply
+		local hooks = ulib_sorted_hooks[i]
+		for _, f in pairs(hooks) do
+			f.fn(target_ply)
+		end
+	end
+	ulx.fancyLogAdmin( calling_ply, true, "#A made #T pretend to disconnect", target_ply )
+end
+local discon = ulx.command( CATEGORY_NAME, "ulx fakedc", ulx.fakedc, "!fakedc", true, false, true )
+discon:addParam{ type=ULib.cmds.PlayerArg, ULib.cmds.optional, hint="target" }
+discon:defaultAccess( ULib.ACCESS_SUPERADMIN )
+discon:help( "Calls disconnect hook logic for the target to fake them leaving the server." )
+
+
 ------------------------------ Ragmaul ------------------------------
 local logecho = GetConVar("ulx_logecho")
 local logfile = GetConVar("ulx_logfile")

@@ -77,7 +77,11 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;Purges command echo backlog. &ensp;Useful for cleaning up administrating gone-wrong.<br>
 &ensp;All will still be visible in `data/ulx_logs`.
 
-- <b>ulx ragmaul</b> ("!ragmaul") `<target>` `<attacker, defaults to self>` <br>
+- <b>ulx fakedc</b> ("!fakedc") `<target, defaults to self>`<br>
+&ensp;Calls disconnect hook logic for the target to fake them leaving the server.<br>
+&ensp;<i>Very</i> funny when paired with fakeban.
+
+- <b>ulx ragmaul</b> ("!ragmaul") `<target>` `<attacker, defaults to self>`<br>
 &ensp;Mauls the target with the attacker's ragdoll.<br>
 &ensp;Will automatically ragdoll and unragdoll the attacker if they aren't already.<br>
 
