@@ -5,7 +5,7 @@ if SERVER then
 	util.AddNetworkString( "FasteroidCSULX" )
 end
 
-local FasteroidCSULX
+FasteroidCSULX = nil
 if CLIENT then
 	WEBSOUNDS = { }
 	FasteroidCSULX = { }
@@ -14,6 +14,33 @@ if CLIENT then
 	end)
 end
 
+FasteroidSharedULX = {}
+
+FasteroidSharedULX.lookupULXCommand = function (command) -- used in swepify and serialize
+	local base_command = ULib.splitArgs( command ) -- get args first
+
+	-- first arg is the command; extract it for use
+	local match = base_command[1] .. " " -- sayCmd keys all end with a space
+	table.remove(base_command, 1)        -- don't need this anymore
+
+	local cmd
+	do
+		local sayCmd = ULib.sayCmds[match]
+		if not sayCmd then -- gorp
+			ULib.tsayError( calling_ply, "Try a 'say' command, like !slap *", true )
+			return
+		end
+		cmd = ULib.cmds.translatedCmds[sayCmd.access]
+	end
+
+	return base_command, match, cmd
+end
+
+FasteroidSharedULX.ulxSayEscape = function(text)
+	text = string.Replace(text,"\\","\\\\")
+	text = string.Replace(text,'"','\\"')
+	return text
+end
 
 ------------------------------ Scare ------------------------------
 function ulx.scare( calling_ply, target_plys, dmg )
@@ -778,45 +805,29 @@ botbomb:help( "Airstrikes the target with a bot." )
 local playerParseAndValidate
 local playersParseAndValidate
 local sayCmdCheck
+local lookupULXCommand = FasteroidSharedULX.lookupULXCommand
+local escape           = FasteroidSharedULX.ulxSayEscape
 
-hook.Add("Think","ULX_Fasteroid_WaitForULib", function()
-	if(hook.GetTable()["PlayerSay"] and ULib) then
+hook.Add("Think","ULX_Fasteroid_SetupSerialize", function()
+	local temp = hook.GetTable()["PlayerSay"]
+	if (ULib and temp["ULib_saycmd"]) then
+		hook.Remove("Think", "ULX_Fasteroid_SetupSerialize")
 		playerParseAndValidate = ULib.cmds.PlayerArg.parseAndValidate
 		playersParseAndValidate = ULib.cmds.PlayersArg.parseAndValidate
-		sayCmdCheck = hook.GetTable()["PlayerSay"]["ULib_saycmd"]
-		hook.Remove("ULX_Fasteroid_WaitForULib")
+		sayCmdCheck = temp["ULib_saycmd"]
 	end
 end)
 
-local function escape(text)
-	text = string.Replace(text,"\\","\\\\")
-	text = string.Replace(text,'"','\\"')
-	return text
-end
-
 function ulx.serialize( calling_ply, command )
 
-	local base_command = ULib.splitArgs( command ) -- get args first
-
-	-- first arg is the command; extract it for use
-	local match = base_command[1] .. " " -- sayCmd keys all end with a space (I think)
-	table.remove(base_command, 1) 
-
-	local cmd
-	do
-		local sayCmd = ULib.sayCmds[match]
-		if not sayCmd then -- gorp
-			ULib.tsayError( calling_ply, "No matching commands found.", true )
-			return
-		end
-		cmd = ULib.cmds.translatedCmds[sayCmd.access]
-	end
+	local base_command, match, cmd = lookupULXCommand(command)
+	if not base_command then return end
 
 	local commands = { base_command } -- start with base command to serialize
 
-	local arg_index = 1
+	local arg_index = 1 -- since some args are invisible, we can't just use the index ipairs gives us below
 
-	for i, argInfo in ipairs( cmd.args ) do -- check each arg to see if it needs to be serialized
+	for _, argInfo in ipairs( cmd.args ) do -- check each arg to see if it needs to be serialized
 
 		if( argInfo.type.invisible ) then
 			continue
@@ -827,7 +838,7 @@ function ulx.serialize( calling_ply, command )
 			local commands_copy = table.Copy(commands) -- copy and purge
 			commands = { }
 			
-			for a, command_copy in pairs(commands_copy) do -- process commands (base command or output from previous loop iter)
+			for _, command_copy in pairs(commands_copy) do -- process commands (base command or output from previous loop iter)
 
 				local suspect_arg = command_copy[arg_index]
 				local targets     = ULib.getUsers(suspect_arg, true, calling_ply)
@@ -866,11 +877,11 @@ local ulx_echo_buffer = nil -- ulib/lua/ulib/shared/util.lua, line 459
 function setupFlushEchoes(onThink)
 	if not ulx_echo_buffer then
 		_, ulx_echo_buffer = debug.getupvalue(onThink,1)
-		hook.Remove("Think","ULX_Fasteroid_GetULibEchoBuffer")
+		hook.Remove("Think","ULX_Fasteroid_SetupPurge")
 	end
 end
 
-hook.Add("Think","ULX_Fasteroid_GetULibEchoBuffer",function()
+hook.Add("Think","ULX_Fasteroid_SetupPurge",function()
 	local onThink = hook.GetTable()["Think"]["ULibQueueThink"]
 	if onThink then
 		setupFlushEchoes(onThink)
@@ -1081,6 +1092,18 @@ ragmaul:help( "Mauls the target with the attacker's ragdoll." )
 
 ------------------------------ Swepify ------------------------------
 
+local sayCmdCheck
+local lookupULXCommand = FasteroidSharedULX.lookupULXCommand
+local escape           = FasteroidSharedULX.ulxSayEscape
+
+hook.Add("Think","ULX_Fasteroid_SetupSwepify", function()
+	local temp = hook.GetTable()["PlayerSay"]
+	if (temp["ULib_saycmd"]) then
+		hook.Remove("Think", "ULX_Fasteroid_SetupSwepify")
+		sayCmdCheck = temp["ULib_saycmd"]
+	end
+end)
+
 local swepify_dormant = util.Stack()
 local swepify_total   = 0
 
@@ -1110,22 +1133,85 @@ local function new_SwepifyClass(id)
 
 end
 
+-- we need to detour several functions at the moment of execution to modify ulx's usual behavior.
+-- this is the part that does the privilege escalation, delete this if you don't want that.
+local function setSwepifyDetours(calling_ply, command)
+	ulx.oldFancyLogAdmin       = ulx.oldFancyLogAdmin or ulx.fancyLogAdmin
+	ULib.oldUclQuery           = ULib.oldUclQuery or ULib.ucl.query
+	ulx.fancyLogAdmin = function(...)
+		local args = {...}
+		args[#args+1] = calling_ply
+		args[#args+1] = command
+		args[2] = args[2] .. " using a gun spawned by #T that executes #s"
+		PrintTable(args)
+		ulx.oldFancyLogAdmin(unpack(args))
+	end
+	ULib.ucl.query = function(...)
+		local args = {...}
+		args[1] = calling_ply
+		return ULib.oldUclQuery(unpack(args))
+	end
+end
+local function clearSwepifyDetours()
+	ulx.fancyLogAdmin = ulx.oldFancyLogAdmin 
+	ULib.ucl.query    = ULib.oldUclQuery 
+end
+
 function ulx.swepify( calling_ply, command )
 
 	if not IsValid( calling_ply ) then ULib.tsayError( calling_ply, "This can't be used from console, sorry...", true ) return end
 
+	local base_command, match, cmd = lookupULXCommand(command)
+	if not base_command then return end
+
 	local SWEP = new_SwepifyClass( swepifyAlloc() )
 
+		function SWEP:SetupDataTables()
+			self.Weapon:GetTable().BaseClass.SetupDataTables(self)
+			timer.Simple(0.1,function()
+				self:SetSwepAuthor(calling_ply:Nick())
+				self:SetSwepName(command)
+			end)
+		end
+
+		function SWEP:PrimaryAttack()
+			self.Weapon:GetTable().BaseClass.PrimaryAttack(self)
+
+			local arg_index = 1 -- since some args are invisible, we can't just use the index ipairs gives us below
+			local command_copy = table.Copy(base_command)
+
+			for _, argInfo in ipairs( cmd.args ) do -- check each arg to see if it needs to be serialized
+				if( argInfo.type.invisible ) then
+					continue
+				end
+				if( command_copy[arg_index] == "@" ) then -- time to replace
+					victim = self.Owner:GetEyeTrace().Entity
+					if( victim:IsPlayer() ) then
+						command_copy[arg_index] = escape(victim:Nick())
+					else
+						command_copy[arg_index] = string.char(34,1,34)
+					end
+				end
+				arg_index = arg_index + 1
+			end
+			setSwepifyDetours(calling_ply, command)
+				pcall( sayCmdCheck, self.Owner, match .. table.concat(command_copy," ") )
+			clearSwepifyDetours()
+		end
+
     weapons.Register(SWEP, SWEP.ClassName)
-        local gun = ents.Create(SWEP.ClassName)
-        gun:SetPos( calling_ply:GetEyeTrace().HitPos )
-        gun:Spawn()
-	--
+	
+	local gun = ents.Create(SWEP.ClassName)
+	local eyetrace = calling_ply:GetEyeTrace()
+	gun:SetPos( eyetrace.HitPos + eyetrace.HitNormal * 15 )
+	gun:Spawn()
 
 	net.Start("FasteroidCSULX")
 		net.WriteString("registerSwepify")
 		net.WriteUInt(SWEP.SwepifyID,16)
 	net.Broadcast()
+
+	ulx.fancyLogAdmin( calling_ply, "#A summoned a gun that executes #s", command )
 
 end
 
@@ -1142,6 +1228,7 @@ if CLIENT then
 		print("created " .. SWEP.ClassName)
 	end
 end
+
 
 ------------------------------ StyledStrike: Block Tools ------------------------------
 local BTools = {
