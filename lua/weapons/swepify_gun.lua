@@ -39,6 +39,13 @@ function SWEP:PrimaryAttack()
 	if SERVER then 
 		self.Owner:EmitSound("AlyxEMP.Discharge") 
 	end
+	local effectdata = EffectData()
+	effectdata:SetOrigin( self.Owner:GetEyeTraceNoCursor().HitPos )
+	effectdata:SetStart( self.Owner:GetShootPos() )
+	effectdata:SetAttachment( 1 )
+	effectdata:SetEntity( self.Weapon )
+	effectdata:SetMagnitude( 1 )
+	util.Effect( "ToolTracer", effectdata )
 end
 
 function SWEP:SetupDataTables()

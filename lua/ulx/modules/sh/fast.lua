@@ -1183,14 +1183,9 @@ function ulx.swepify( calling_ply, command )
 					continue
 				end
 				if( command_copy[arg_index] == "@" ) then -- time to replace
-					local tr = util.TraceHull({
-						start = self.Owner:GetShootPos(),
-						endpos = self.Owner:GetShootPos() + ( self.Owner:GetAimVector() * 8192 ),
-						filter = self.Owner,
-						mins = Vector( -8, -8, -8 ),
-						maxs = Vector( 8, 8, 8 ),
-						mask = MASK_SHOT_HULL
-					})
+					self.Owner:LagCompensation(true)
+					local tr = self.Owner:GetEyeTraceNoCursor()
+					self.Owner:LagCompensation(false)
 					local victim = tr.Entity
 					if( victim:IsPlayer() ) then
 						command_copy[arg_index] = escape(victim:Nick())
