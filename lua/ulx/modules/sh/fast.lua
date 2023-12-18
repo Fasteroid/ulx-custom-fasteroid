@@ -1173,6 +1173,7 @@ function ulx.swepify( calling_ply, command )
 			timer.Simple(0.1,function()
 				self:SetSwepAuthor(calling_ply:Nick())
 				self:SetSwepName(command)
+				self.AuthorEntity = calling_ply
 			end)
 		end
 

@@ -21,16 +21,28 @@ SWEP.Instructions   = "Left mouse to execute ULX command, right mouse to drop."
 SWEP.ViewModel      = "models/weapons/c_pistol.mdl"
 SWEP.WorldModel     = "models/weapons/w_pistol.mdl"
 
-SWEP.HoldType          = "pistol"
-SWEP.Primary.Automatic = false
-SWEP.Primary.Ammo      = "none"
-SWEP.Primary.ClipSize  = -1
-SWEP.Secondary.Ammo    = "none"
-SWEP.Secondary.ClipSize  = -1
+SWEP.HoldType           = "pistol"
+SWEP.Primary.Automatic  = false
+SWEP.Primary.Ammo       = "none"
+SWEP.Primary.ClipSize   = -1
+SWEP.Secondary.Ammo     = "none"
+SWEP.Secondary.ClipSize = -1
 
-SWEP.UseHands = true
+SWEP.UseHands     = true
+SWEP.AuthorEntity = nil
 
-function SWEP:Initialize() end
+function SWEP:Initialize() 
+	if SERVER then
+		hook.Add("Think", self.Weapon, function()
+			if self.AuthorEntity and not self.AuthorEntity:IsValid() then
+				local effectdata = EffectData()
+				effectdata:SetOrigin( self.Weapon:GetPos() )
+				util.Effect( "HelicopterMegaBomb", effectdata )
+				self:Remove()
+			end
+		end)
+	end
+end
 
 function SWEP:Reload() end
 
