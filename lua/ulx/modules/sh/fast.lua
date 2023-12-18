@@ -1092,7 +1092,13 @@ ragmaul:help( "Mauls the target with the attacker's ragdoll." )
 
 ------------------------------ Swepify ------------------------------
 
+for _, gun in ipairs( ents.FindByClass("swepify_gun_*") ) do
+	gun:Remove()
+end
+
 local sayCmdCheck
+local playerParseAndValidate
+local playersParseAndValidate
 local lookupULXCommand = FasteroidSharedULX.lookupULXCommand
 local escape           = FasteroidSharedULX.ulxSayEscape
 
@@ -1100,12 +1106,75 @@ hook.Add("Think","ULX_Fasteroid_SetupSwepify", function()
 	local temp = hook.GetTable()["PlayerSay"]
 	if (temp["ULib_saycmd"]) then
 		hook.Remove("Think", "ULX_Fasteroid_SetupSwepify")
+		playerParseAndValidate = ULib.cmds.PlayerArg.parseAndValidate
+		playersParseAndValidate = ULib.cmds.PlayersArg.parseAndValidate
 		sayCmdCheck = temp["ULib_saycmd"]
 	end
 end)
 
-for _, gun in ipairs( ents.FindByClass("swepify_gun_*") ) do
-	gun:Remove()
+-- we need to detour several functions at the moment of execution to modify ulx's usual behavior.
+-- this is the part that does the privilege escalation, delete this if you don't want that.
+local function setSwepifyDetours(calling_ply, command, cmd)
+
+	ulx.oldFancyLogAdmin  = ulx.oldFancyLogAdmin or ulx.fancyLogAdmin
+	ULib.oldUclQuery      = ULib.oldUclQuery or ULib.ucl.query
+	ULib.oldGetUsers      = ULib.oldGetUsers or ULib.getUsers
+
+	local playerParseAndValidate_detour = function(...)
+		local args = {...}
+		args[2] = calling_ply
+		return playerParseAndValidate(unpack(args))
+	end
+	local playersParseAndValidate_detour = function(...)
+		local args = {...}
+		args[2] = calling_ply
+		return playersParseAndValidate(unpack(args))
+	end
+
+	for _, arg in ipairs( cmd.args ) do 
+		local argtype = arg.type
+		if argtype.invisible then continue end
+		if argtype.parseAndValidate == playerParseAndValidate then
+			argtype.parseAndValidate = playerParseAndValidate_detour
+			argtype.oldParse         = playerParseAndValidate
+			print("replaced")
+		end
+		if argtype.parseAndValidate == playersParseAndValidate then
+			print("replaced")
+			argtype.parseAndValidate = playersParseAndValidate_detour
+			argtype.oldParse         = playersParseAndValidate
+		end
+	end
+
+	ulx.fancyLogAdmin = function(...)
+		local args = {...}
+		args[#args+1] = calling_ply
+		args[#args+1] = command
+		args[2] = args[2] .. " using a gun spawned by #T that executes #s"
+		ulx.oldFancyLogAdmin(unpack(args))
+	end
+	ULib.ucl.query = function(...)
+		local args = {...}
+		args[1] = calling_ply
+		return ULib.oldUclQuery(unpack(args))
+	end
+	ULib.getUsers = function(...)
+		local args = {...}
+		args[3] = calling_ply
+		return ULib.oldGetUsers(unpack(args))
+	end
+
+end
+
+local function clearSwepifyDetours(cmd)
+	ulx.fancyLogAdmin = ulx.oldFancyLogAdmin 
+	ULib.ucl.query    = ULib.oldUclQuery 
+	ULib.getUsers     = ULib.oldGetUsers 
+
+	for _, arg in ipairs( cmd.args ) do 
+		local argtype = arg.type
+		if argtype.oldParse then argtype.parseAndValidate = argtype.oldParse end
+	end
 end
 
 local swepify_dormant = util.Stack()
@@ -1136,29 +1205,6 @@ local function new_SwepifyClass(id)
 
 end
 
--- we need to detour several functions at the moment of execution to modify ulx's usual behavior.
--- this is the part that does the privilege escalation, delete this if you don't want that.
-local function setSwepifyDetours(calling_ply, command)
-	ulx.oldFancyLogAdmin       = ulx.oldFancyLogAdmin or ulx.fancyLogAdmin
-	ULib.oldUclQuery           = ULib.oldUclQuery or ULib.ucl.query
-	ulx.fancyLogAdmin = function(...)
-		local args = {...}
-		args[#args+1] = calling_ply
-		args[#args+1] = command
-		args[2] = args[2] .. " using a gun spawned by #T that executes #s"
-		ulx.oldFancyLogAdmin(unpack(args))
-	end
-	ULib.ucl.query = function(...)
-		local args = {...}
-		args[1] = calling_ply
-		return ULib.oldUclQuery(unpack(args))
-	end
-end
-local function clearSwepifyDetours()
-	ulx.fancyLogAdmin = ulx.oldFancyLogAdmin 
-	ULib.ucl.query    = ULib.oldUclQuery 
-end
-
 function ulx.swepify( calling_ply, command )
 
 	if not IsValid( calling_ply ) then ULib.tsayError( calling_ply, "This can't be used from console, sorry...", true ) return end
@@ -1183,7 +1229,7 @@ function ulx.swepify( calling_ply, command )
 			local arg_index = 1 -- since some args are invisible, we can't just use the index ipairs gives us below
 			local command_copy = table.Copy(base_command)
 
-			for _, argInfo in ipairs( cmd.args ) do -- check each arg to see if it needs to be serialized
+			for _, argInfo in ipairs( cmd.args ) do -- check each arg to see if it needs to be converted
 				if( argInfo.type.invisible ) then
 					continue
 				end
@@ -1204,9 +1250,9 @@ function ulx.swepify( calling_ply, command )
 				end
 				arg_index = arg_index + 1
 			end
-			setSwepifyDetours(calling_ply, command)
+			setSwepifyDetours(calling_ply, command, cmd)
 				pcall( sayCmdCheck, self.Owner, match .. table.concat(command_copy," ") )
-			clearSwepifyDetours()
+			clearSwepifyDetours(cmd)
 		end
 
     weapons.Register(SWEP, SWEP.ClassName)
