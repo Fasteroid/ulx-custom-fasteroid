@@ -1079,6 +1079,70 @@ ragmaul:defaultAccess( ULib.ACCESS_ADMIN )
 ragmaul:help( "Mauls the target with the attacker's ragdoll." )
 
 
+------------------------------ Swepify ------------------------------
+
+local swepify_dormant = util.Stack()
+local swepify_total   = 0
+
+local function swepifyAlloc()
+	if #swepify_dormant > 0 then 
+		return swepify_dormant:Pop() 
+	else
+		swepify_total = swepify_total + 1
+		return swepify_total
+	end
+end
+
+local function new_SwepifyClass(id)
+
+	local SWEP = {}
+	SWEP.Base = "swepify_gun"
+	SWEP.SwepifyID = id
+	SWEP.ClassName = "swepify_gun_" .. id
+
+	function SWEP:OnRemove()
+		swepify_dormant:Push(self.SwepifyID)
+		weapons.Register({Base = "swepify_gun"}, self.ClassName)
+		print("free " .. self.SwepifyID)
+	end
+
+	return SWEP
+
+end
+
+function ulx.swepify( calling_ply, command )
+
+	if not IsValid( calling_ply ) then ULib.tsayError( calling_ply, "This can't be used from console, sorry...", true ) return end
+
+	local SWEP = new_SwepifyClass( swepifyAlloc() )
+
+    weapons.Register(SWEP, SWEP.ClassName)
+        local gun = ents.Create(SWEP.ClassName)
+        gun:SetPos( calling_ply:GetEyeTrace().HitPos )
+        gun:Spawn()
+	--
+
+	net.Start("FasteroidCSULX")
+		net.WriteString("registerSwepify")
+		net.WriteUInt(SWEP.SwepifyID,16)
+	net.Broadcast()
+
+end
+
+local swepify = ulx.command( CATEGORY_NAME, "ulx swepify", ulx.swepify, "!swepify" )
+swepify:addParam{ type=ULib.cmds.StringArg, ULib.cmds.takeRestOfLine, hint="any ulx command" }
+swepify:defaultAccess( ULib.ACCESS_SUPERADMIN )
+swepify:help( "Package a command into a SWEP.  Best used with the @ selector!" )
+
+if CLIENT then
+	FasteroidCSULX.registerSwepify = function()
+		local id = net.ReadUInt(16)
+		local SWEP = new_SwepifyClass(id)
+		weapons.Register(SWEP, SWEP.ClassName)
+		print("created " .. SWEP.ClassName)
+	end
+end
+
 ------------------------------ StyledStrike: Block Tools ------------------------------
 local BTools = {
 	blocked = {},
