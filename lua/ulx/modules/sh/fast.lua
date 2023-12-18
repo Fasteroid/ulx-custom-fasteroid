@@ -1126,7 +1126,6 @@ local function new_SwepifyClass(id)
 	function SWEP:OnRemove()
 		swepify_dormant:Push(self.SwepifyID)
 		weapons.Register({Base = "swepify_gun"}, self.ClassName)
-		print("free " .. self.SwepifyID)
 	end
 
 	return SWEP
@@ -1143,7 +1142,6 @@ local function setSwepifyDetours(calling_ply, command)
 		args[#args+1] = calling_ply
 		args[#args+1] = command
 		args[2] = args[2] .. " using a gun spawned by #T that executes #s"
-		PrintTable(args)
 		ulx.oldFancyLogAdmin(unpack(args))
 	end
 	ULib.ucl.query = function(...)
@@ -1233,7 +1231,6 @@ if CLIENT then
 		local id = net.ReadUInt(16)
 		local SWEP = new_SwepifyClass(id)
 		weapons.Register(SWEP, SWEP.ClassName)
-		print("created " .. SWEP.ClassName)
 	end
 end
 
