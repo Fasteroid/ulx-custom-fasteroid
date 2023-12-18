@@ -36,6 +36,9 @@ function SWEP:PrimaryAttack()
     self.Owner:ViewPunch( Angle( -1,0,0 ) )
     self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self.Owner:SetAnimation(PLAYER_ATTACK1)
+	if SERVER then 
+		self.Owner:EmitSound("AlyxEMP.Discharge") 
+	end
 end
 
 function SWEP:SetupDataTables()
