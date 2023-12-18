@@ -1104,6 +1104,10 @@ hook.Add("Think","ULX_Fasteroid_SetupSwepify", function()
 	end
 end)
 
+for _, gun in ipairs( ents.FindByClass("swepify_gun_*") ) do
+	gun:Remove()
+end
+
 local swepify_dormant = util.Stack()
 local swepify_total   = 0
 
@@ -1186,8 +1190,12 @@ function ulx.swepify( calling_ply, command )
 					self.Owner:LagCompensation(true)
 					local tr = self.Owner:GetEyeTraceNoCursor()
 					self.Owner:LagCompensation(false)
+
 					local victim = tr.Entity
-					if( victim:IsPlayer() ) then
+
+					if victim:IsVehicle() then victim = victim:GetDriver() end
+
+					if IsValid(victim) and victim:IsPlayer() then
 						command_copy[arg_index] = escape(victim:Nick())
 					else
 						command_copy[arg_index] = string.char(34,1,34)
