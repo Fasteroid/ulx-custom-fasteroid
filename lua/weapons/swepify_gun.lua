@@ -33,7 +33,7 @@ function SWEP:Initialize() end
 function SWEP:Reload() end
 
 function SWEP:PrimaryAttack()
-    self.Owner:ViewPunch( Angle( -5,0,0 ) )
+    self.Owner:ViewPunch( Angle( -1,0,0 ) )
     self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
     self.Owner:SetAnimation(PLAYER_ATTACK1)
 end
