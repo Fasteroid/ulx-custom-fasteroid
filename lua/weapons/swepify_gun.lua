@@ -18,7 +18,7 @@ SWEP.Slot           = 5
 SWEP.Author         = "(Console)"
 SWEP.Instructions   = "Left mouse to execute ULX command, right mouse to drop."
 
-SWEP.ViewModel      = "models/weapons/v_pistol.mdl"
+SWEP.ViewModel      = "models/weapons/c_pistol.mdl"
 SWEP.WorldModel     = "models/weapons/w_pistol.mdl"
 
 SWEP.HoldType          = "pistol"
@@ -27,6 +27,8 @@ SWEP.Primary.Ammo      = "none"
 SWEP.Primary.ClipSize  = -1
 SWEP.Secondary.Ammo    = "none"
 SWEP.Secondary.ClipSize  = -1
+
+SWEP.UseHands = true
 
 function SWEP:Initialize() end
 
