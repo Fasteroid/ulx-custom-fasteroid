@@ -796,55 +796,55 @@ end
 
 function ulx.serialize( calling_ply, command )
 
-	-- first pick out the command from saycmds
+	local base_command = ULib.splitArgs( command ) -- get args first
 
-	local match = nil
+	-- first arg is the command; extract it for use
+	local match = base_command[1] .. " " -- sayCmd keys all end with a space (I think)
+	table.remove(base_command, 1) 
 
-	for str, data in pairs( ULib.sayCmds ) do
-		local str2 = str
-		if command:len() < str:len() then -- Go ahead and allow commands w/o spaces
-			str2 = string.Trim( str )
+	local cmd
+	do
+		local sayCmd = ULib.sayCmds[match]
+		if not sayCmd then -- gorp
+			ULib.tsayError( calling_ply, "No matching commands found.", true )
+			return
 		end
-
-		if (command:sub( 1, str2:len() ):lower() == str2) and (not match or match:len() <= str:len()) then -- Don't rematch if there's a more specific one already.
-			match = str
-		end
+		cmd = ULib.cmds.translatedCmds[sayCmd.access]
 	end
 
-	if match == nil then -- gorp
-		ULib.tsayError( calling_ply, "No matching commands found.", true )
-		return
-	end
+	local commands = { base_command } -- start with base command to serialize
 
-	-- now parse and split the command based on the args
+	local arg_index = 1
 
-	local access = ULib.sayCmds[match].access
-	local cmd = ULib.cmds.translatedCmds[access]
+	for i, argInfo in ipairs( cmd.args ) do -- check each arg to see if it needs to be serialized
 
-	local argv = ULib.splitArgs( command )
-	table.remove(argv, 1)
-
-	local commands = { argv }
-
-	local j = 1
-	for i, argInfo in ipairs( cmd.args ) do -- Translate each input arg into our output
 		if( argInfo.type.invisible ) then
 			continue
 		end
-		if( (argInfo.type.parseAndValidate == playerParseAndValidate or argInfo.type.parseAndValidate == playersParseAndValidate) and argv[j] ) then -- SERIALIZE PLAYERARG!
-			local oldcommands = table.Copy(commands)
+
+		if( (argInfo.type.parseAndValidate == playerParseAndValidate or argInfo.type.parseAndValidate == playersParseAndValidate) and base_command[arg_index] ) then -- time to serialize
+
+			local commands_copy = table.Copy(commands) -- copy and purge
 			commands = { }
-			for a, argv_local in pairs(oldcommands) do
-				local oldarg = argv_local[j]
-				local targets = ULib.getUsers(oldarg,true,calling_ply)
-				for k, v in pairs( targets ) do
-					local argvcopy = table.Copy(argv_local)
-					argvcopy[j] = '"' .. escape( v:Nick() ) .. '"'
-					table.insert(commands, argvcopy)
+			
+			for a, command_copy in pairs(commands_copy) do -- process commands (base command or output from previous loop iter)
+
+				local suspect_arg = command_copy[arg_index]
+				local targets     = ULib.getUsers(suspect_arg, true, calling_ply)
+
+				if not targets then continue end
+
+				for k, v in pairs( targets ) do -- generate serialized commands
+					local new_command = table.Copy(command_copy)
+					new_command[arg_index] = '"' .. escape( v:Nick() ) .. '"'
+					table.insert(commands, new_command)
 				end
+
 			end
 		end
-		j = j + 1
+
+		arg_index = arg_index + 1
+
 	end
 
 	ulx.fancyLogAdmin( calling_ply, "#A serialized #s", command )
