@@ -1122,12 +1122,14 @@ local function setSwepifyDetours(calling_ply, command, cmd, swep)
 
 	local playerParseAndValidate_detour = function(...)
 		local args = {...}
+		if not args[3] then args[3] = "^" end
 		if args[3] == "!" then args[3] = "!^" end
 		args[2] = calling_ply
 		return playerParseAndValidate(unpack(args))
 	end
 	local playersParseAndValidate_detour = function(...)
 		local args = {...}
+		if not args[3] then args[3] = "^" end
 		if args[3] == "!" then args[3] = "!^" end
 		args[2] = calling_ply
 		return playersParseAndValidate(unpack(args))
@@ -1149,7 +1151,9 @@ local function setSwepifyDetours(calling_ply, command, cmd, swep)
 		local args = {...}
 		args[#args+1] = calling_ply
 		args[#args+1] = command
-		args[2] = args[2] .. " using a gun spawned by #T that executes #s"
+		if type(args[2]) == "string" then
+			args[2] = args[2] .. " using a gun spawned by #T that executes #s"
+		end
 		ulx.oldFancyLogAdmin(unpack(args))
 	end
 	ULib.ucl.query = function(...)
