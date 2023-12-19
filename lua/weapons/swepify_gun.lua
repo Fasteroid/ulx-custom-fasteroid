@@ -1,7 +1,3 @@
-function CLIENT_OR_SERVER()
-	if CLIENT then return "CLIENT" else return "SERVER" end
-end
-
 if (SERVER) then --the init.lua stuff goes in here
     AddCSLuaFile()
     SWEP.AutoSwitchTo = true
@@ -50,7 +46,6 @@ end
 
 SWEPIFY.generate = function(id)
 	if id == nil then id = SWEPIFY.allocate() end
-	print(CLIENT_OR_SERVER() .. ": generated " .. id)
 
 	local SWEP = {}
 	SWEP.Base = "swepify_gun"
@@ -84,7 +79,6 @@ SWEP.UseHands     = true
 SWEP.AuthorEntity = nil   -- server only
 
 function SWEP:SetupDataTables()
-	print(CLIENT_OR_SERVER() .. ": SetupDataTables")
 	self:NetworkVar("String", 0, "SwepAuthor")
 	self:NetworkVar("String", 1, "SwepName")
 	self:NetworkVar("Int",0, "SwepID")
@@ -92,12 +86,10 @@ end
 
 function SWEP:OnRemove()
 	if SERVER then SWEPIFY.free(self.SwepID) end
-	print(CLIENT_OR_SERVER() .. ": remove " .. self.SwepID)
 	weapons.Register({Base = "swepify_gun"}, self.ClassName)
 end
 
 function SWEP:Initialize()
-	print(CLIENT_OR_SERVER() .. ": Initialize")
 	if SERVER then
 		hook.Add("Think", self.Weapon, function()
 			if self.AuthorEntity and not self.AuthorEntity:IsValid() then
@@ -140,7 +132,6 @@ end
 
 if CLIENT then
 	local this = table.Copy(SWEP)
-	PrintTable(this)
 	hook.Add("OnEntityCreated","ULX_Fasteroid_SwepifyDownload",function(e)
 		if(e:GetClass():StartsWith("swepify_gun")) then
 			weapons.Register(this, e:GetClass())

@@ -1190,10 +1190,14 @@ function ulx.swepify( calling_ply, command )
 
 			local arg_index = 1 -- since some args are invisible, we can't just use the index ipairs gives us below
 			local command_copy = table.Copy(base_command)
+			local args_copy    = table.Copy(cmd.args)
+			table.remove(args_copy,1) -- no caller
 
-			for _, argInfo in ipairs( cmd.args ) do -- check each arg to see if it needs to be converted
-				if( argInfo.invisible ) then continue end
-				if( command_copy[arg_index] == "@" ) then -- time to replace
+			for _, argInfo in ipairs(args_copy) do -- check each arg to see if it needs to be converted
+
+				if argInfo.invisible then continue end
+
+				if command_copy[arg_index] == "@" then -- time to replace
 					self.Owner:LagCompensation(true)
 					local tr = self.Owner:GetEyeTraceNoCursor()
 					self.Owner:LagCompensation(false)
@@ -1227,13 +1231,12 @@ function ulx.swepify( calling_ply, command )
 	gun:SetSwepName( command )
 	gun:Spawn()
 
-
 	ulx.fancyLogAdmin( calling_ply, "#A summoned a gun that executes #s", command )
 
 end
 
 local swepify = ulx.command( CATEGORY_NAME, "ulx swepify", ulx.swepify, "!swepify" )
-swepify:addParam{ type=ULib.cmds.StringArg, ULib.cmds.takeRestOfLine, hint="any ulx command" }
+swepify:addParam{ type=ULib.cmds.StringArg,  hint="any ulx command", ULib.cmds.takeRestOfLine }
 swepify:defaultAccess( ULib.ACCESS_SUPERADMIN )
 swepify:help( "Package a command into a SWEP.  Best used with the @ selector!" )
 
