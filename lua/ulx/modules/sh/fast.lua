@@ -1092,10 +1092,6 @@ ragmaul:help( "Mauls the target with the attacker's ragdoll." )
 
 ------------------------------ Swepify ------------------------------
 
-for _, gun in ipairs( ents.FindByClass("swepify_gun_*") ) do
-	gun:Remove()
-end
-
 local sayCmdCheck
 local playerParseAndValidate
 local playersParseAndValidate
@@ -1180,34 +1176,6 @@ local function clearSwepifyDetours(cmd)
 	end
 end
 
-local swepify_dormant = util.Stack()
-local swepify_total   = 0
-
-local function swepifyAlloc()
-	if #swepify_dormant > 0 then 
-		return swepify_dormant:Pop() 
-	else
-		swepify_total = swepify_total + 1
-		return swepify_total
-	end
-end
-
-local function new_SwepifyClass(id)
-
-	local SWEP = {}
-	SWEP.Base = "swepify_gun"
-	SWEP.SwepifyID = id
-	SWEP.ClassName = "swepify_gun_" .. id
-
-	function SWEP:OnRemove()
-		swepify_dormant:Push(self.SwepifyID)
-		weapons.Register({Base = "swepify_gun"}, self.ClassName)
-	end
-
-	return SWEP
-
-end
-
 function ulx.swepify( calling_ply, command )
 
 	if not IsValid( calling_ply ) then ULib.tsayError( calling_ply, "This can't be used from console, sorry...", true ) return end
@@ -1215,16 +1183,7 @@ function ulx.swepify( calling_ply, command )
 	local base_command, match, cmd = lookupULXCommand(command)
 	if not base_command then return end
 
-	local SWEP = new_SwepifyClass( swepifyAlloc() )
-
-		function SWEP:SetupDataTables()
-			self.Weapon:GetTable().BaseClass.SetupDataTables(self)
-			timer.Simple(0.1,function()
-				self:SetSwepAuthor(calling_ply:Nick())
-				self:SetSwepName(command)
-				self.AuthorEntity = calling_ply
-			end)
-		end
+	local SWEP = SWEPIFY.generate()
 
 		function SWEP:PrimaryAttack()
 			self.Weapon:GetTable().BaseClass.PrimaryAttack(self)
@@ -1251,22 +1210,23 @@ function ulx.swepify( calling_ply, command )
 				end
 				arg_index = arg_index + 1
 			end
+
 			setSwepifyDetours(calling_ply, command, cmd, self)
 				pcall( sayCmdCheck, self.Owner, match .. table.concat(command_copy," ") )
 			clearSwepifyDetours(cmd)
-		end
 
-    weapons.Register(SWEP, SWEP.ClassName)
+		end
 	
+	weapons.Register(SWEP, SWEP.ClassName)
+
 	local gun = ents.Create(SWEP.ClassName)
 	local eyetrace = calling_ply:GetEyeTrace()
 	gun:SetPos( eyetrace.HitPos + eyetrace.HitNormal * 15 )
+	gun:SetSwepID( SWEP.SwepID )
+	gun:SetSwepAuthor( calling_ply:Nick() )
+	gun:SetSwepName( command )
 	gun:Spawn()
 
-	net.Start("FasteroidCSULX")
-		net.WriteString("registerSwepify")
-		net.WriteUInt(SWEP.SwepifyID,16)
-	net.Broadcast()
 
 	ulx.fancyLogAdmin( calling_ply, "#A summoned a gun that executes #s", command )
 
@@ -1276,15 +1236,6 @@ local swepify = ulx.command( CATEGORY_NAME, "ulx swepify", ulx.swepify, "!swepif
 swepify:addParam{ type=ULib.cmds.StringArg, ULib.cmds.takeRestOfLine, hint="any ulx command" }
 swepify:defaultAccess( ULib.ACCESS_SUPERADMIN )
 swepify:help( "Package a command into a SWEP.  Best used with the @ selector!" )
-
-if CLIENT then
-	FasteroidCSULX.registerSwepify = function()
-		local id = net.ReadUInt(16)
-		local SWEP = new_SwepifyClass(id)
-		weapons.Register(SWEP, SWEP.ClassName)
-	end
-end
-
 
 ------------------------------ StyledStrike: Block Tools ------------------------------
 local BTools = {
