@@ -39,7 +39,7 @@ end
 FasteroidSharedULX.ulxSayEscape = function(text)
 	text = string.Replace(text,"\\","\\\\")
 	text = string.Replace(text,'"','\\"')
-	return text
+	return '"' .. text .. '"'
 end
 
 ------------------------------ Scare ------------------------------
@@ -847,7 +847,7 @@ function ulx.serialize( calling_ply, command )
 
 				for k, v in pairs( targets ) do -- generate serialized commands
 					local new_command = table.Copy(command_copy)
-					new_command[arg_index] = '"' .. escape( v:Nick() ) .. '"'
+					new_command[arg_index] = escape( v:Nick() )
 					table.insert(commands, new_command)
 				end
 
@@ -1114,7 +1114,7 @@ end)
 
 -- we need to detour several functions at the moment of execution to modify ulx's usual behavior.
 -- this is the part that does the privilege escalation, delete this if you don't want that.
-local function setSwepifyDetours(calling_ply, command, cmd)
+local function setSwepifyDetours(calling_ply, command, cmd, swep)
 
 	ulx.oldFancyLogAdmin  = ulx.oldFancyLogAdmin or ulx.fancyLogAdmin
 	ULib.oldUclQuery      = ULib.oldUclQuery or ULib.ucl.query
@@ -1122,25 +1122,24 @@ local function setSwepifyDetours(calling_ply, command, cmd)
 
 	local playerParseAndValidate_detour = function(...)
 		local args = {...}
+		if args[3] == "!" then args[3] = "!^" end
 		args[2] = calling_ply
 		return playerParseAndValidate(unpack(args))
 	end
 	local playersParseAndValidate_detour = function(...)
 		local args = {...}
+		if args[3] == "!" then args[3] = "!^" end
 		args[2] = calling_ply
 		return playersParseAndValidate(unpack(args))
 	end
 
 	for _, arg in ipairs( cmd.args ) do 
 		local argtype = arg.type
-		if argtype.invisible then continue end
 		if argtype.parseAndValidate == playerParseAndValidate then
 			argtype.parseAndValidate = playerParseAndValidate_detour
 			argtype.oldParse         = playerParseAndValidate
-			print("replaced")
 		end
 		if argtype.parseAndValidate == playersParseAndValidate then
-			print("replaced")
 			argtype.parseAndValidate = playersParseAndValidate_detour
 			argtype.oldParse         = playersParseAndValidate
 		end
@@ -1160,7 +1159,7 @@ local function setSwepifyDetours(calling_ply, command, cmd)
 	end
 	ULib.getUsers = function(...)
 		local args = {...}
-		args[3] = calling_ply
+		args[3] = swep.Owner
 		return ULib.oldGetUsers(unpack(args))
 	end
 
@@ -1230,9 +1229,7 @@ function ulx.swepify( calling_ply, command )
 			local command_copy = table.Copy(base_command)
 
 			for _, argInfo in ipairs( cmd.args ) do -- check each arg to see if it needs to be converted
-				if( argInfo.type.invisible ) then
-					continue
-				end
+				if( argInfo.invisible ) then continue end
 				if( command_copy[arg_index] == "@" ) then -- time to replace
 					self.Owner:LagCompensation(true)
 					local tr = self.Owner:GetEyeTraceNoCursor()
@@ -1250,7 +1247,7 @@ function ulx.swepify( calling_ply, command )
 				end
 				arg_index = arg_index + 1
 			end
-			setSwepifyDetours(calling_ply, command, cmd)
+			setSwepifyDetours(calling_ply, command, cmd, self)
 				pcall( sayCmdCheck, self.Owner, match .. table.concat(command_copy," ") )
 			clearSwepifyDetours(cmd)
 		end
