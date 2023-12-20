@@ -11,6 +11,23 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 ### Just put this repository in your server's addons folder—simple and easy. &nbsp;After you have all the dependencies, restart the server and it should be good to go!
 
 ## Commands & Usage
+### Meta Commands
+- <b>ulx purge</b> ("!purge")<br>
+&ensp;Purges command echo backlog. &ensp;Useful for cleaning up administrating gone-wrong.<br>
+&ensp;All will still be visible in `data/ulx_logs`.
+
+- <b>ulx serialize</b> ("!serialize") `<command>`<br>
+&ensp;Lets you target multiple players with commands that only accept one, eg `!return *`.<br>
+&ensp;While this *should* work with most commands, I can't guarantee it will work for *all*. &nbsp;Please be careful.<br>
+&ensp;Commands ran through serialize are ran as the caller to prevent privilege escalation.
+&ensp;<table><tr><td>**WARNING: People can do things like `!serialize !ban * 0 I am a serial killer!` with this!**<br>*Be very careful granting this to people with ban access!*</td></tr></table>
+
+- <b>ulx swepify</b> ("!swepify") `<command>`<br>
+&ensp;Packages ULX commands into SWEPs. &nbsp;It works best with the `@` selector, which targets players under your crosshair.<br>
+&ensp;The SWEPs can be dropped with right mouse and will self-destruct if their creator leaves the server.
+&ensp;<table><tr><td>**WARNING: Swepify guns execute with the same permissions as the person who created them!**<br>*Don't give your `!ban @ 0` gun to little timmy, or he can ban people with it!*</td></tr></table>
+
+### Everything Else
 - <b>ulx scare</b> ("!scare") `<players>` `<damage: default 0>`<br>
 &ensp;Slaps target(s) with the stalker scream sound and inflicts damage.
 
@@ -59,34 +76,25 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;Exposes target(s) to very loud sound until stopped with !asmr.<br>
 &ensp;Prolonged exposure should really be avoided; this may actually harm players at full volume.<br>
 
-- <b>ulx fakeban</b> ("!fakeban") `<player>` `[<minutes, 0 for perma: 0<=x, default 0>]` `[{reason}]`<br>
-&ensp;Announces the target was ulx banned, but doesn't actually ban them.<br>
-&ensp;Best used with '0' minutes and a petty ban reason.<br>
-
 - <b>ulx botbomb</b> ("!botbomb") `<player>`<br>
 &ensp;Airstrikes the target with a bot. &nbsp;The bot explodes when it lands and will kill the target if it lands on them.<br>
 &ensp;The bot has <i>some</i> airstrafing capabilities but will probably miss if dropped on a moving target.
 
-- <b>ulx serialize</b> ("!serialize") `<command>`<br>
-&ensp;Lets you target multiple players with commands that only accept one, eg `!return *`.<br>
-&ensp;While this *should* work with most commands, I can't guarantee it will work for *all*. &nbsp;Please be careful.<br>
-&ensp;Commands ran through serialize are ran as the caller to protect against privilege escalation.
-&ensp;<table><tr><td>**WARNING: People can do things like `!serialize !ban * 0 I am a serial killer!` with this!**<br>*Be careful when granting !serialize to those with ban access.*</td></tr></table>
-
-- <b>ulx purge</b> ("!purge")<br>
-&ensp;Purges command echo backlog. &ensp;Useful for cleaning up administrating gone-wrong.<br>
-&ensp;All will still be visible in `data/ulx_logs`.
-
 - <b>ulx fakedc</b> ("!fakedc") `<target, defaults to self>`<br>
 &ensp;Calls disconnect hook logic for the target to fake them leaving the server.<br>
-&ensp;<i>Very</i> funny when paired with fakeban.
+&ensp;Use on yourself to juke minges and make them think you left the server!
+
+- <b>ulx fakeban</b> ("!fakeban") `<player>` `[<minutes, 0 for perma: 0<=x, default 0>]` `[{reason}]`<br>
+&ensp;An improved fake ban that also fakes the victim disconnecting.<br>
+&ensp;Best used with '0' minutes and a petty ban reason.<br>
 
 - <b>ulx ragmaul</b> ("!ragmaul") `<target>` `<attacker, defaults to self>`<br>
 &ensp;Mauls the target with the attacker's ragdoll.<br>
 &ensp;Will automatically ragdoll and unragdoll the attacker if they aren't already.<br>
 
 - <b>ulx blocktool</b> ("!blocktool") `<players>` `<tool class>`<br>
-&ensp;Blocks a tool for the target(s)
+&ensp;Blocks a tool for the target(s).
+&ensp;Written by StyledStrike.
 
 ## Bonus Improvements
 - Deaths now set your "previous location" so you can `ulx return` to it.
