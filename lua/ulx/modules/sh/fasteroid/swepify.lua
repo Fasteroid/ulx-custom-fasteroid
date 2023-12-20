@@ -141,6 +141,8 @@ function ulx.swepify( calling_ply, command )
 	gun:SetSwepName( command )
 	gun:Spawn()
 
+	weapons.Register({Base = "swepify_gun"}, SWEP.ClassName)
+
 	ulx.fancyLogAdmin( calling_ply, "#A summoned a gun that executes #s", command )
 
 end

@@ -105,6 +105,10 @@ function SWEP:Initialize()
 		self.PrintName = self:GetSwepName()
 		self.SwepID    = self:GetSwepID()
 	end
+	if not self.SwepID then
+		self.Weapon:EmitSound("buttons/button10.wav") 
+		self.Weapon:Remove()
+	end
 end
 
 function SWEP:PrimaryAttack()
