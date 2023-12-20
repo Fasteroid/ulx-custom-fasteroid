@@ -43,22 +43,28 @@ do -- initialize common functions
 end
 
 do -- initialize commands
-    local commands = file.Find( "ulx/modules/sh/fasteroid/*.lua", "LUA" )
 
-    local function catch( err )
-        print( "ERROR: ", err )
-    end
+    local authors  = {"fasteroid", "styledstrike"}
+    for _, author in ipairs(authors) do
+        local commands = file.Find( "ulx/modules/sh/"..author.."/*.lua", "LUA" )
 
-    for _, file in ipairs( commands ) do
-        FasteroidSharedULX.currentFile = file
-        local printFile = file
-        if #file > 14 then
-            printFile = file:sub(1, 7) .. "...lua "
+        local function catch( err )
+            print( "ERROR: ", err )
         end
-        Msg( "//  SUBMODULE: " .. printFile .. string.rep( " ", 14 - file:len() ) .. "//\n" )
-        xpcall( include, catch, "fasteroid/" .. file )
-        AddCSLuaFile( "ulx/modules/sh/fasteroid/" .. file )
+
+        for _, file in ipairs( commands ) do
+            FasteroidSharedULX.currentFile = file
+            local printFile = file
+            if #file > 14 then
+                printFile = file:sub(1, 7) .. "...lua "
+            end
+            Msg( "//  SUBMODULE: " .. printFile .. string.rep( " ", 14 - file:len() ) .. "//\n" )
+            xpcall( include, catch, author.."/" .. file )
+            AddCSLuaFile( "ulx/modules/sh/"..author.."/" .. file )
+        end
+
     end
 
     FasteroidSharedULX.currentFile = nil
+    
 end
