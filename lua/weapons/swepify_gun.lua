@@ -132,7 +132,7 @@ end
 
 if CLIENT then
 	local this = table.Copy(SWEP)
-	hook.Add("OnEntityCreated","ULX_Fasteroid_SwepifyDownload",function(e)
+	hook.Add("OnEntityCreated","ULX.Fasteroid.SwepifyDownload",function(e)
 		if(e:GetClass():StartsWith("swepify_gun")) then
 			weapons.Register(this, e:GetClass())
 		end
