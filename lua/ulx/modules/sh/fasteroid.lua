@@ -12,7 +12,7 @@ do -- initialize common functions
     end
 
     FasteroidSharedULX = FasteroidSharedULX or {}
-    FasteroidSharedULX.lookupULXCommand = function (command) -- used in swepify and serialize
+    FasteroidSharedULX.lookupULXCommand = function (command, calling_ply) -- used in swepify and serialize
         local base_command = ULib.splitArgs( command ) -- get args first
 
         -- first arg is the command; extract it for use

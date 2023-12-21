@@ -20,7 +20,7 @@ end)
 
 function ulx.serialize( calling_ply, command )
 
-	local base_command, match, cmd = lookupULXCommand(command)
+	local base_command, match, cmd = lookupULXCommand(command, calling_ply)
 	if not base_command then return end
 
 	local commands = { base_command } -- start with base command to serialize

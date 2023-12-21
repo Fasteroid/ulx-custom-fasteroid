@@ -90,7 +90,7 @@ function ulx.swepify( calling_ply, command )
 
 	if not IsValid( calling_ply ) then ULib.tsayError( calling_ply, "This can't be used from console, sorry...", true ) return end
 
-	local base_command, match, cmd = lookupULXCommand(command)
+	local base_command, match, cmd = lookupULXCommand(command, calling_ply)
 	if not base_command then return end
 
 	local SWEP = SWEPIFY.generate()
