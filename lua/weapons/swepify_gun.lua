@@ -113,19 +113,21 @@ end
 
 function SWEP:PrimaryAttack()
 	self.Owner = self:GetOwner()
-    self.Owner:ViewPunch( Angle( -1,0,0 ) )
-    self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
-    self.Owner:SetAnimation(PLAYER_ATTACK1)
 	if SERVER then 
+		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
+		self.Owner:SetAnimation(PLAYER_ATTACK1)
+		self.Owner:ViewPunch( Angle( -1,0,0 ) )
 		self.Owner:EmitSound("AlyxEMP.Discharge") 
 	end
-	local effectdata = EffectData()
-	effectdata:SetOrigin( self.Owner:GetEyeTraceNoCursor().HitPos )
-	effectdata:SetStart( self.Owner:GetShootPos() )
-	effectdata:SetAttachment( 1 )
-	effectdata:SetEntity( self.Weapon )
-	effectdata:SetMagnitude( 1 )
-	util.Effect( "ToolTracer", effectdata )
+	if CLIENT and IsFirstTimePredicted() or SERVER then
+		local effectdata = EffectData()
+		effectdata:SetOrigin( self.Owner:GetEyeTraceNoCursor().HitPos )
+		effectdata:SetStart( self.Owner:GetShootPos() )
+		effectdata:SetAttachment( 1 )
+		effectdata:SetEntity( self.Weapon )
+		effectdata:SetMagnitude( 1 )
+		util.Effect( "ToolTracer", effectdata )
+	end
 end
 
 function SWEP:SecondaryAttack()    
