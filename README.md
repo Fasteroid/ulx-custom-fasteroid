@@ -92,6 +92,10 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 &ensp;Mauls the target with the attacker's ragdoll.<br>
 &ensp;Will automatically ragdoll and unragdoll the attacker if they aren't already.<br>
 
+- <b>ulx prop</b> ("!prop") `<players>` `<string>`<br>
+&ensp;Turns target(s) into inanimate objects.<br>
+&ensp;Destructable props make this command more fun.<br>
+
 - <b>ulx blocktool</b> ("!blocktool") `<players>` `<tool class>`<br>
 &ensp;Blocks a tool for the target(s).
 &ensp;Written by StyledStrike.
