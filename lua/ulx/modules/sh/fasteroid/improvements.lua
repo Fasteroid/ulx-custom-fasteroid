@@ -55,7 +55,7 @@ do
             for i=1, amt do
                 local ent = net.ReadEntity()
                 -- stupid client is slow and we need to wait for it to learn about the ragdoll ent
-                local hookname = "ulxRagdollColor" .. ent:Nick()
+                local hookname = "ulxRagdollColor_" .. ( (ent and ent:Nick()) or i )
                 hook.Add("Tick", hookname, function()
                     local rag = ent:GetNW2Entity("ulxragdoll")
                     if rag then
