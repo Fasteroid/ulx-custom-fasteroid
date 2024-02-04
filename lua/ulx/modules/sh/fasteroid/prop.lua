@@ -98,7 +98,7 @@ function ulx.prop( calling_ply, target_plys, model, opposite )
 	end
 end
 
-local prop = ulx.command( CATEGORY_NAME, "ulx prop", ulx.prop, "!prop" )
+local prop = ulx.command( FasteroidSharedULX.category, "ulx prop", ulx.prop, "!prop" )
 prop:addParam{ type=ULib.cmds.PlayersArg }
 prop:addParam{ type=ULib.cmds.StringArg }
 prop:addParam{ type=ULib.cmds.BoolArg, invisible=true }
