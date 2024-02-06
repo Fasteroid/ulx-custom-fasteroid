@@ -134,6 +134,7 @@ function ulx.swepify( calling_ply, command )
 	weapons.Register(SWEP, SWEP.ClassName)
 
 	local gun = ents.Create(SWEP.ClassName)
+	gun.AuthorEntity = calling_ply
 	local eyetrace = calling_ply:GetEyeTrace()
 	gun:SetPos( eyetrace.HitPos + eyetrace.HitNormal * 15 )
 	gun:SetSwepID( SWEP.SwepID )

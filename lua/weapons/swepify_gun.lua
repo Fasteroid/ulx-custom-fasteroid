@@ -76,7 +76,7 @@ SWEP.Secondary.Ammo     = "none"
 SWEP.Secondary.ClipSize = -1
 
 SWEP.UseHands     = true
-SWEP.AuthorEntity = nil   -- server only
+SWEP.AuthorEntity = nil
 
 function SWEP:SetupDataTables()
 	self:NetworkVar("String", 0, "SwepAuthor")
@@ -90,20 +90,19 @@ function SWEP:OnRemove()
 end
 
 function SWEP:Initialize()
-	if SERVER then
-		hook.Add("Think", self.Weapon, function()
-			if self.AuthorEntity and not self.AuthorEntity:IsValid() then
+	if CLIENT then
+		self.Author    = self:GetSwepAuthor()
+		self.PrintName = self:GetSwepName()
+		self.SwepID    = self:GetSwepID()
+	else
+		hook.Add("Think", self.Weapon, function() 
+			if not IsValid(self.AuthorEntity) then
 				local effectdata = EffectData()
 				effectdata:SetOrigin( self.Weapon:GetPos() )
 				util.Effect( "HelicopterMegaBomb", effectdata )
 				self:Remove()
 			end
 		end)
-	end
-	if CLIENT then
-		self.Author    = self:GetSwepAuthor()
-		self.PrintName = self:GetSwepName()
-		self.SwepID    = self:GetSwepID()
 	end
 	if not self.SwepID then
 		self.Weapon:EmitSound("buttons/button10.wav") 
@@ -113,6 +112,7 @@ end
 
 function SWEP:PrimaryAttack()
 	self.Owner = self:GetOwner()
+	if not IsValid(self.AuthorEntity) then return end -- just in case
 	if SERVER then 
 		self.Weapon:SendWeaponAnim(ACT_VM_PRIMARYATTACK)
 		self.Owner:SetAnimation(PLAYER_ATTACK1)
