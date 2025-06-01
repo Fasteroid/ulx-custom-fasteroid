@@ -1,16 +1,24 @@
 ------------------------------ Fake Disconnect ------------------------------
-function ulx.fakedc(calling_ply, target_ply)
+function ulx.fakedc(calling_ply, target_ply, reason)
 	local ulib_sorted_hooks = hook.GetULibTable()["PlayerDisconnected"]
 	for i=-1, 2 do -- skip -2 since that will de-auth the target_ply
 		local hooks = ulib_sorted_hooks[i]
 		for _, f in pairs(hooks) do
-			f.fn(target_ply)
+			pcall(f.fn, target_ply)
 		end
 	end
+	local data = {
+		["name"] = target_ply:Nick(),
+		["networkid"] = target_ply:SteamID(),
+		["userid"] = target_ply:UserID(),
+		["reason"] = reason or "",
+	}
+	hook.Run("player_disconnect", data)
 	ulx.fancyLogAdmin( calling_ply, true, "#A made #T pretend to disconnect", target_ply )
 end
 local discon = ulx.command( FasteroidSharedULX.category, "ulx fakedc", ulx.fakedc, "!fakedc", true, false, true )
 discon:addParam{ type=ULib.cmds.PlayerArg, ULib.cmds.optional, hint="target" }
+discon:addParam{ type=ULib.cmds.StringArg, hint="reason", ULib.cmds.optional, ULib.cmds.takeRestOfLine }
 discon:defaultAccess( ULib.ACCESS_ADMIN )
 discon:help( "Calls disconnect hook logic for the target to fake them leaving the server." )
 
