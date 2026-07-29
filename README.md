@@ -8,7 +8,7 @@ Also, the command for rating players requires [SUI Scoreboard](https://github.co
 
 ## Installation
 
-### Just put this repository in your server's addons folder—simple and easy. &nbsp;After you have all the dependencies, restart the server and it should be good to go!
+### Just put this repository in your server's addons folder... easy right? &nbsp;After you have all the dependencies, restart the server and it should be good to go!
 
 ## Commands & Usage
 ### Meta Commands
